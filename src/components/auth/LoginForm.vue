@@ -52,10 +52,11 @@
         />
 
         
-        <div class="text-center mt-3 mb-10">
+        <div class="text-center mt-3 mb-10 ">
             <v-btn rounded
                 type="submit"
-                style="background: linear-gradient(to bottom right, rgba(135, 206, 250, 1), rgba(176, 224, 230, 1));">SIGN IN
+                style="background: linear-gradient(to bottom right, rgba(135, 206, 250, 1), rgba(176, 224, 230, 1)); text-decoration: none;">
+                <RouterLink to="/dashboard" style="text-decoration: none; color:white "> SIGN IN</RouterLink>
             </v-btn>
         </div>
     </v-form>

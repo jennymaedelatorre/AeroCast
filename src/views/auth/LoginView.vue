@@ -8,8 +8,9 @@ import RegisterForm from '@/components/auth/RegisterForm.vue';
 <!-- prepend-icon="mdi-account" -->
 
 <template>
-  <AppLayout>
-    <template #login_reg>
+  <v-responsive class="border rounded">
+    <v-app>
+      <v-container class="full-height mt-16 mb-15" fluid>
       <v-row align="center" justify="center">
         <v-col cols="12" sm="8" md="8">
           <v-card class="elevation-12 custom-border">
@@ -105,8 +106,9 @@ import RegisterForm from '@/components/auth/RegisterForm.vue';
           </v-card>
         </v-col>
       </v-row>
-    </template>
-  </AppLayout>
+      </v-container>
+    </v-app>
+  </v-responsive>
 </template>
 
 <script>
