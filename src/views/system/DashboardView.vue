@@ -41,3 +41,4 @@ function changeContent(content) {
     </template>
   </AppLayout>
 </template>
+

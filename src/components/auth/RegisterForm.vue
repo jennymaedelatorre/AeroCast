@@ -1,15 +1,17 @@
 <script setup>
   import { ref } from 'vue'
   import { requiredValidator, emailValidator, passwordValidator, confirmedValidator } from '@/utils/validators';
+  import AlertNotification from '@/components/common/AlertNotification.vue';
+  import { supabase, formActionDefault } from '@/utils/supabase.js'
+  import { useRouter } from 'vue-router'
 
-  const visible = ref(false)
-  const IsPasswordConfirmVisible = ref(false)
+  // Load pre-defined vue  functions
+  const router = useRouter()
 
-  const refVform = ref()
-
+  // Load Variables
   const formDataDefault = {
     firstname:'',
-    lastname:'',
+    lastname:'',  
     email: '',
     password: '',
     password_confirmation:'',
@@ -18,21 +20,67 @@
   const formData = ref({
     ...formDataDefault
   })
+  const formAction = ref({
+    ...formActionDefault
+  })
+  const visible = ref(false)
+  const IsPasswordConfirmVisible = ref(false)
+  const refVform = ref()
 
-  const onSubmit = () => {
-    alert(formData.value.password)
+  // Register Functionality
+  const onSubmit = async () => {
+    // Reset Form Action utils
+    formAction.value = {... formActionDefault}
+    // Turn on processing
+    formAction.value.formProcess = true
+
+    const { data, error } = await supabase.auth.signUp(
+      {
+      email: formData.value.email,
+      password: formData.value.password,
+      options: {
+        data: {
+          first_name: formData.value.firstname,
+          lastname: formData.value.lastname,
+          is_admin: false //Just Turn to true if admin account
+          //role: 'Administrator' // If role based
+        }
+      }
+      }
+    )
+
+    if(error){
+      // console.log(error) Add Error Message and Status Code
+      formAction.value.formErrorMessage = error.message
+      formAction.value.formStatus = error.status
+    }
+    else if(data){
+      // console.log(data) Add Success Message 
+      formAction.value.formSuccessMessage = 'Successfully Registered Account.'
+      // Add here more actions if you want
+      router.replace('/dashboard')
+    }
+
+    // Reset Form
+    refVform.value?.reset()
+    // Turn off Processing
+    formAction.value.formProcess = false
   }
 
+  // Trigger Validators
   const onFormSubmit = () => {
     refVform.value?.validate().then(({ valid }) => {
         if (valid) onSubmit()
      })
   }
-
-
 </script>
 
 <template>
+  <AlertNotification 
+    :form-success-message="formAction.formSuccessMessage"
+    :form-error-message="formAction.formErrorMessage"
+  ></AlertNotification>  
+
     <v-form ref="refVform" @submit.prevent="onFormSubmit">
         <v-container>
             <v-row>
@@ -86,8 +134,8 @@
                         :type="visible ? 'text' : 'password'"
                         color="teal accent-3" 
                         @click:append-inner="visible = !visible"
-                        :rules="[requiredValidator, passwordValidator]">
-                    </v-text-field>
+                        :rules="[requiredValidator, passwordValidator]"
+                    ></v-text-field>
                 </v-col>
             </v-row>
 
@@ -111,6 +159,8 @@
             <div class="text-center mt-3 mb-10">
                 <v-btn rounded
                     type="submit"
+                    :disabled="formAction.formProcess"
+                    :loading="formAction.formProcess"
                     style="background: linear-gradient(to bottom right, rgba(135, 206, 250, 1), rgba(176, 224, 230, 1));">SIGN UP
                 </v-btn>
             </div>
