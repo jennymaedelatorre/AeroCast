@@ -17,23 +17,23 @@
     <v-list density="compact" nav>
       <v-list-item class="spaced-list-item" prepend-icon="mdi-view-grid-outline" value="home"
         @click="$emit('navigate', 'HomeContent')">
-        <v-list-item-title style="font-size: 16px; font-weight: bold;" >Home</v-list-item-title>
+        <v-list-item-title style="font-size: 14px; font-weight: bold;" >Home</v-list-item-title>
       </v-list-item>
       <v-list-item class="spaced-list-item" prepend-icon="mdi-map-outline" value="map"
         @click="$emit('navigate', 'MapContent')">
-        <v-list-item-title style="font-size: 16px; font-weight: bold;">Map</v-list-item-title>
+        <v-list-item-title style="font-size: 14px; font-weight: bold;">Map</v-list-item-title>
       </v-list-item>
       <v-list-item class="spaced-list-item" prepend-icon="mdi-map-marker-radius" value="location"
         @click="$emit('navigate', 'LocationContent')">
-        <v-list-item-title style="font-size: 16px; font-weight: bold;">Cities</v-list-item-title>
+        <v-list-item-title style="font-size: 14px; font-weight: bold;">Cities</v-list-item-title>
       </v-list-item>
       <v-list-item class="spaced-list-item" prepend-icon="mdi-calendar-month" value="calendar"
         @click="$emit('navigate', 'CalendarContent')">
-        <v-list-item-title style="font-size: 16px; font-weight: bold;">Calendar</v-list-item-title>
+        <v-list-item-title style="font-size: 14px; font-weight: bold;">Calendar</v-list-item-title>
       </v-list-item>
       <v-list-item class="spaced-list-item" prepend-icon="mdi-cog" value="setting"
         @click="$emit('navigate', 'SettingContent')">
-        <v-list-item-title style="font-size: 16px; font-weight: bold;">Settings</v-list-item-title>
+        <v-list-item-title style="font-size: 14px; font-weight: bold;">Settings</v-list-item-title>
       </v-list-item>
     </v-list>
   </v-navigation-drawer>
@@ -60,7 +60,7 @@ body {
 }
 
 .v-list-item {
-  font-size: 20px;
+  font-size: 15px;
 }
 
 .spaced-list-item {

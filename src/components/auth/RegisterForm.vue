@@ -81,7 +81,7 @@
     :form-error-message="formAction.formErrorMessage"
   ></AlertNotification>  
 
-    <v-form ref="refVform" @submit.prevent="onFormSubmit">
+  <v-form ref="refVform" @submit.prevent="onFormSubmit" class="text-slide-down">
         <v-container>
             <v-row>
                 <!-- First Name and Last Name Side by Side -->
@@ -134,8 +134,8 @@
                         :type="visible ? 'text' : 'password'"
                         color="teal accent-3" 
                         @click:append-inner="visible = !visible"
-                        :rules="[requiredValidator, passwordValidator]"
-                    ></v-text-field>
+                        :rules="[requiredValidator, passwordValidator]">
+                    </v-text-field>
                 </v-col>
             </v-row>
 
@@ -159,11 +159,36 @@
             <div class="text-center mt-3 mb-10">
                 <v-btn rounded
                     type="submit"
-                    :disabled="formAction.formProcess"
-                    :loading="formAction.formProcess"
-                    style="background: linear-gradient(to bottom right, rgba(135, 206, 250, 1), rgba(176, 224, 230, 1));">SIGN UP
+                    class="custom-btn-gradient">SIGN UP
                 </v-btn>
             </div>
         </v-container>
     </v-form>
 </template>
+
+<style scoped>
+@keyframes slideDown {
+  from {
+    transform: translateY(-20px); 
+    opacity: 0; 
+  }
+  to {
+    transform: translateY(0); 
+    opacity: 1; 
+  }
+}
+
+.text-slide-down {
+  animation: slideDown 0.5s ease forwards;
+}
+.custom-btn-gradient {
+  background-color: #121640;
+  color: white;
+  border: none;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+.custom-btn-gradient:hover {
+  background: linear-gradient(to top right, #87cefa, #b0e0e6);
+  color: white;
+}
+</style>
