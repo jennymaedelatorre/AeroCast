@@ -2,6 +2,8 @@
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
+import 'leaflet/dist/leaflet.css';
+
 
 // Vuetify imports
 import '@mdi/font/css/materialdesignicons.css'

@@ -17,28 +17,28 @@
     <v-list density="compact" nav>
       <v-list-item class="spaced-list-item" prepend-icon="mdi-view-grid-outline" value="home"
         @click="$emit('navigate', 'HomeContent')">
-        <v-list-item-title>Home</v-list-item-title>
+        <v-list-item-title style="font-size: 16px; font-weight: bold;" >Home</v-list-item-title>
       </v-list-item>
       <v-list-item class="spaced-list-item" prepend-icon="mdi-map-outline" value="map"
         @click="$emit('navigate', 'MapContent')">
-        <v-list-item-title>Map</v-list-item-title>
+        <v-list-item-title style="font-size: 16px; font-weight: bold;">Map</v-list-item-title>
       </v-list-item>
       <v-list-item class="spaced-list-item" prepend-icon="mdi-map-marker-radius" value="location"
         @click="$emit('navigate', 'LocationContent')">
-        <v-list-item-title>Location</v-list-item-title>
+        <v-list-item-title style="font-size: 16px; font-weight: bold;">Cities</v-list-item-title>
       </v-list-item>
       <v-list-item class="spaced-list-item" prepend-icon="mdi-calendar-month" value="calendar"
         @click="$emit('navigate', 'CalendarContent')">
-        <v-list-item-title>Calendar</v-list-item-title>
+        <v-list-item-title style="font-size: 16px; font-weight: bold;">Calendar</v-list-item-title>
       </v-list-item>
       <v-list-item class="spaced-list-item" prepend-icon="mdi-cog" value="setting"
         @click="$emit('navigate', 'SettingContent')">
-        <v-list-item-title>Settings</v-list-item-title>
+        <v-list-item-title style="font-size: 16px; font-weight: bold;">Settings</v-list-item-title>
       </v-list-item>
     </v-list>
   </v-navigation-drawer>
 
-  <v-main class="main-content">
+  <v-main class="main-content" style="margin-left: -30px;">
     <router-view /> 
   </v-main>
 </template>
@@ -55,12 +55,12 @@ body {
 }
 
 .nav-drawer {
-  border-right: 25px;
+  border-right: 55px;
   background-color: #2a2e3b;
 }
 
 .v-list-item {
-  font-size: 19px;
+  font-size: 20px;
 }
 
 .spaced-list-item {
@@ -70,7 +70,7 @@ body {
 }
 
 .logo-img {
-  width: 150px;
+  width: 180px;
   height: auto;
   transition: width 0.3s ease;
 }
