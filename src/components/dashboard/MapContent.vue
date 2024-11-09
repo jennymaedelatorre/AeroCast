@@ -48,6 +48,8 @@ onMounted(() => {
 <style scoped>
 .map-content {
   border-radius: 30px;
+  width: 98%;
+  margin-left: 15px;
 }
 .map {
   height: 900px;
