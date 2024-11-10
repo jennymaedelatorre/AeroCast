@@ -19,7 +19,7 @@
                   25&deg;C
                 </v-col>
                 <v-col class="weather-icon text-right" cols="6">
-                  <img src="/imgs/4.png" alt="Weather" width="150" />
+                  <img src="/imgs/sun.png" alt="Weather" width="150" />
                 </v-col>
               </v-row>
             </v-card-text>
@@ -292,27 +292,28 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue';
+import cloudyIcon from '/imgs/4.png';
 import sunnyIcon from '/imgs/sun.png';
 import stormyIcon from '/imgs/storm.png';
 import rainyIcon from '/imgs/rain.png';
 
 // Define the hourly forecast data
 const hourlyForecast = ref([
-  { hour: '6:00 AM', image: sunnyIcon, temperature: 24 },
-  { hour: '7:00 AM', image: stormyIcon, temperature: 28 },
+  { hour: '6:00 AM', image: cloudyIcon, temperature: 24 },
+  { hour: '7:00 AM', image: cloudyIcon, temperature: 28 },
   { hour: '8:00 AM', image: sunnyIcon, temperature: 32 },
-  { hour: '8:00 AM', image: rainyIcon, temperature: 15 },
-  { hour: '8:00 AM', image: rainyIcon, temperature: 18 },
-  { hour: '8:00 AM', image: sunnyIcon, temperature: 22 },
-  { hour: '8:00 AM', image: sunnyIcon, temperature: 21 },
-  { hour: '8:00 AM', image: sunnyIcon, temperature: 25 },
-  { hour: '8:00 AM', image: sunnyIcon, temperature: 19 },
-  { hour: '8:00 AM', image: sunnyIcon, temperature: 26 },
-  { hour: '8:00 AM', image: rainyIcon, temperature: 17 },
-  { hour: '8:00 AM', image: rainyIcon, temperature: 18 },
-  { hour: '8:00 AM', image: rainyIcon, temperature: 19 },
-  { hour: '8:00 AM', image: sunnyIcon, temperature: 25 },
-  { hour: '8:00 AM', image: sunnyIcon, temperature: 22 },
+  { hour: '9:00 AM', image: rainyIcon, temperature: 15 },
+  { hour: '10:00 AM', image: rainyIcon, temperature: 18 },
+  { hour: '11:00 AM', image: sunnyIcon, temperature: 22 },
+  { hour: '12:00 NN', image: sunnyIcon, temperature: 21 },
+  { hour: '1:00 PM', image: sunnyIcon, temperature: 25 },
+  { hour: '2:00 PM', image: sunnyIcon, temperature: 19 },
+  { hour: '3:00 PM', image: sunnyIcon, temperature: 26 },
+  { hour: '4:00 PM', image: rainyIcon, temperature: 17 },
+  { hour: '5:00 PM', image: rainyIcon, temperature: 18 },
+  { hour: '6:00 PM', image: rainyIcon, temperature: 19 },
+  { hour: '7:00 PM', image: rainyIcon, temperature: 18 },
+  { hour: '8:00 PM', image: rainyIcon, temperature: 15 },
 
 ]);
 

@@ -1,5 +1,5 @@
 <template>
-  <v-card class="map-content" style="margin-top: -20px; margin-left: 220px">
+  <v-card class="map-content" style="margin-top: -20px;">
     <div id="map" class="map"></div>
   </v-card>
 </template>
@@ -48,7 +48,8 @@ onMounted(() => {
 <style scoped>
 .map-content {
   border-radius: 30px;
-  margin-left: 10px;
+  width: 98%;
+  margin-left: 15px;
 }
 .map {
   height: 900px;

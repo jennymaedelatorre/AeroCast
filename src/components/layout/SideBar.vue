@@ -1,46 +1,46 @@
 <template>
-
-  <!-- <v-btn color="primary" @click.stop="drawer = !drawer">
-    Toggle
-  </v-btn> -->
-
-  <v-navigation-drawer permanent class="nav-drawer text-white" width="230">
+  <v-navigation-drawer permanent class="nav-drawer text-white" width="230" style="position: fixed; top: 0; bottom: 0; z-index: 1;">
     <v-list class="d-flex flex-column align-center">
       <v-list-item class="d-flex flex-column align-center mt-8 mb-6">
         <img src="/imgs/logo1.png" alt="Logo" class="logo-img" />
-        <!-- <v-list-item-title class="title-text mt-2">AeroCast</v-list-item-title> -->
       </v-list-item>
     </v-list>
 
     <v-divider class="mb-10"></v-divider>
 
-    <v-list density="compact" nav>
-      <v-list-item class="spaced-list-item" prepend-icon="mdi-view-grid-outline" value="home"
-        @click="$emit('navigate', 'HomeContent')">
-        <v-list-item-title style="font-size: 16px; font-weight: bold;" >Home</v-list-item-title>
-      </v-list-item>
-      <v-list-item class="spaced-list-item" prepend-icon="mdi-map-outline" value="map"
-        @click="$emit('navigate', 'MapContent')">
-        <v-list-item-title style="font-size: 16px; font-weight: bold;">Map</v-list-item-title>
-      </v-list-item>
-      <v-list-item class="spaced-list-item" prepend-icon="mdi-map-marker-radius" value="location"
-        @click="$emit('navigate', 'LocationContent')">
-        <v-list-item-title style="font-size: 16px; font-weight: bold;">Cities</v-list-item-title>
-      </v-list-item>
-      <v-list-item class="spaced-list-item" prepend-icon="mdi-calendar-month" value="calendar"
-        @click="$emit('navigate', 'CalendarContent')">
-        <v-list-item-title style="font-size: 16px; font-weight: bold;">Calendar</v-list-item-title>
-      </v-list-item>
-      <v-list-item class="spaced-list-item" prepend-icon="mdi-cog" value="setting"
-        @click="$emit('navigate', 'SettingContent')">
-        <v-list-item-title style="font-size: 16px; font-weight: bold;">Settings</v-list-item-title>
-      </v-list-item>
+    <v-list density="compact" nav active>
+      <!-- Correct the paths here to include /dashboard -->
+      <router-link to="/dashboard/home" class="spaced-list-item" style="text-decoration: none; color: inherit;" active-class="active-link">
+        <v-list-item prepend-icon="mdi-view-grid-outline">
+          <v-list-item-title>Home</v-list-item-title>
+        </v-list-item>
+      </router-link>
+
+      <router-link to="/dashboard/map" class="spaced-list-item" style="text-decoration: none; color: inherit;" active-class="active-link">
+        <v-list-item prepend-icon="mdi-map-outline">
+          <v-list-item-title>Map</v-list-item-title>
+        </v-list-item>
+      </router-link>
+
+      <router-link to="/dashboard/location" class="spaced-list-item" style="text-decoration: none; color: inherit;" active-class="active-link">
+        <v-list-item prepend-icon="mdi-map-marker-radius">
+          <v-list-item-title>Cities</v-list-item-title>
+        </v-list-item>
+      </router-link>
+
+      <router-link to="/dashboard/calendar" class="spaced-list-item" style="text-decoration: none; color: inherit;" active-class="active-link">
+        <v-list-item prepend-icon="mdi-calendar-month">
+          <v-list-item-title>Calendar</v-list-item-title>
+        </v-list-item>
+      </router-link>
+
+      <router-link to="/dashboard/settings" class="spaced-list-item" style="text-decoration: none; color: inherit;" active-class="active-link">
+        <v-list-item prepend-icon="mdi-cog">
+          <v-list-item-title>Settings</v-list-item-title>
+        </v-list-item>
+      </router-link>
     </v-list>
   </v-navigation-drawer>
-
-  <v-main class="main-content" style="margin-left: -30px;">
-    <router-view /> 
-  </v-main>
 </template>
 
 <script setup>
@@ -49,24 +49,41 @@ import { ref } from 'vue'
 const drawer = ref(null)
 </script>
 
-<style>
+<style scoped>
 body {
-  background: #0a0404;
+  background: #191d2c;
 }
 
 .nav-drawer {
-  border-right: 55px;
-  background-color: #2a2e3b;
+  position: fixed; 
+  top: 0;  
+  bottom: 0; 
+  width: 230px;  
+  background-color: #2a2e3b;  
+  z-index: 1; 
+  overflow-y: auto; 
 }
 
 .v-list-item {
-  font-size: 20px;
+  font-size: 15px;
 }
 
 .spaced-list-item {
   display: flex;
   align-items: center;
-  padding: 20px;
+  padding: 15px;
+}
+.active-link {
+  background-color: rgba(124, 123, 123, 0.247); 
+  border-radius: 20px;
+  color: #fff;
+  font-weight: bolder;
+}
+.active-link .v-list-item-title, 
+.active-link .v-list-item {
+  color: #fff !important; 
+  font-weight: bolder; 
+  font-size: 16px;
 }
 
 .logo-img {
@@ -74,7 +91,8 @@ body {
   height: auto;
   transition: width 0.3s ease;
 }
+
 .main-content {
-  margin-left:-0px ; 
+  margin-left: 230px;  
 }
 </style>

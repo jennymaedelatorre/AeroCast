@@ -160,9 +160,9 @@
     </v-card-text>
   </v-card>
 
-  <!-- Integrated 3-Day Weather Forecast -->
-  <v-card class="forecast-card text-white" elevation="0" style="background-color: #2a2e3b; padding: 20px; margin-top: 20px;">
-    <v-card-title style="font-size: 20px; text-align: center; margin-bottom: 20px; margin-top: 10px; color: gray;">
+  <!-- 3-Day Weather Forecast -->
+  <v-card class="forecast-card text-white" elevation="0" style="background-color: #2a2e3b; padding: 20px; margin-top: 20px;" v-if="selectedCity">
+    <v-card-title style="font-size: 16px; text-align: center; margin-bottom: 20px; margin-top: 10px; color: gray;">
       <v-icon left class="mr-2">mdi-calendar</v-icon>
       3-Day Weather Forecast
     </v-card-title>
@@ -196,7 +196,7 @@
 export default {
   data() {
     return {
-      selectedCity: null, // To track the selected city
+      selectedCity: 'Butuan City', 
       cityWeather: {
         'Butuan City': { temperature: 28, condition: 'Sunny', icon: '/imgs/sun.png' },
         'Baguio City': { temperature: 18, condition: 'Cloudy', icon: '/imgs/storm.png' },
@@ -205,11 +205,18 @@ export default {
         'Cagayan De Oro City': { temperature: 17, condition: 'Stormy', icon: '/imgs/storm.png' },
       }, // Sample weather data for each city
       hourlyForecast: [
-        { hour: '1 PM', image: '/imgs/sun.png', temperature: 28 },
-        { hour: '2 PM', image: '/imgs/sun.png', temperature: 29 },
-        { hour: '3 PM', image: '/imgs/sun.png', temperature: 30 },
-        { hour: '4 PM', image: '/imgs/sun.png', temperature: 31 },
-        { hour: '5 PM', image: '/imgs/sun.png', temperature: 32 },
+        { hour: '7:00 AM', image: '/imgs/rain.png', temperature: 18 },
+        { hour: '8:00 AM', image: '/imgs/6.png', temperature: 19 },
+        { hour: '9:00 AM', image: '/imgs/4.png', temperature: 20 },
+        { hour: '10:00 AM', image: '/imgs/sun.png', temperature: 21 },
+        { hour: '11:00 AM', image: '/imgs/sun.png', temperature: 23 },
+        { hour: '12:00 NN', image: '/imgs/sun.png', temperature: 28 },
+        { hour: '1:00 PM', image: '/imgs/sun.png', temperature: 29 },
+        { hour: '2:00 PM', image: '/imgs/sun.png', temperature: 32 },
+        { hour: '3:00 PM', image: '/imgs/sun.png', temperature: 30 },
+        { hour: '4:00 PM', image: '/imgs/sun.png', temperature: 28 },
+        { hour: '5:00 PM', image: '/imgs/sun.png', temperature: 25 },
+        { hour: '6:00 PM', image: '/imgs/rain.png', temperature: 18 },
       ],
       threeDayForecast: [
         { date: 'Tomorrow', temperature: 30, icon: '/imgs/sun.png', description: 'Sunny' },
