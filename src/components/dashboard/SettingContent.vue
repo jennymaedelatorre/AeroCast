@@ -157,15 +157,15 @@
       </v-card>
     </v-dialog>
 
-    <v-card class="logout-card text-white mt-8 mb-8" style="background-color:#2a2e3b; border-radius: 30px; padding: 20px;">
-      <v-row>
-        <v-col cols="11"> <v-card-title class="logout-header" style="color: gray;">Log out</v-card-title></v-col>
-        <router-link to="/login" class="logout-icon-link">
-            <v-icon size="24" class="pt-8 pl-10">mdi-logout</v-icon>
-          </router-link>
-      </v-row>
-    </v-card>
-
+    <router-link to="/" class="logout-icon-link">
+      <v-card class="logout-card text-white mt-8 mb-8" style="background-color:#2a2e3b; border-radius: 30px; padding: 20px;">
+        <v-row>
+          <v-col cols="11"> <v-card-title class="logout-header">Log out</v-card-title></v-col>        
+              <v-icon size="24" class="pt-8 pl-10">mdi-logout</v-icon>
+        </v-row>
+      </v-card>
+    </router-link>
+    
   </v-container>
 </template>
 
@@ -243,7 +243,7 @@ function toggleNotification() {
 
 .logout-icon-link {
   color: white;
-  text-align: center;
+  /* text-align: center; */
   text-decoration: none;
 }
  
