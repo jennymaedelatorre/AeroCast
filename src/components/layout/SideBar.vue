@@ -62,6 +62,8 @@ body {
   background-color: #2a2e3b;  
   z-index: 1; 
   overflow-y: auto; 
+  border-top-right-radius: 30px;
+  border-bottom-right-radius: 30px
 }
 
 .v-list-item {
@@ -90,6 +92,16 @@ body {
   width: 180px;
   height: auto;
   transition: width 0.3s ease;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0); 
+  }
+  50% {
+    transform: translateY(-10px); 
+  }
 }
 
 .main-content {

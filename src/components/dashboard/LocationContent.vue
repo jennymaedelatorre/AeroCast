@@ -20,7 +20,7 @@
           </v-col>
 
           <v-col class="text-right" style="margin-right: 30px;">
-            <h2 class="temperature mb-3" style="font-size: 50px;">28°C</h2>
+            <h2 class="temperature mb-3" style="font-size: 50px;">25°C</h2>
             <v-btn color="primary" rounded @click="onSeeMoreClick('Butuan City')" class="see-more">
               <h4 style="font-size: 11px;">Set default</h4>
             </v-btn>
@@ -86,7 +86,7 @@
           </v-col>
 
           <v-col class="text-right" style="margin-right: 30px;">
-            <h2 class="temperature mb-3" style="font-size: 50px;">32°C</h2>
+            <h2 class="temperature mb-3" style="font-size: 50px;">26°C</h2>
             <v-btn color="primary" rounded @click="onSeeMoreClick('Cebu City')" class="see-more">
               <h4 style="font-size: 11px;">Set default</h4>
             </v-btn>
@@ -108,7 +108,7 @@
           </v-col>
 
           <v-col class="text-right" style="margin-right: 30px;">
-            <h2 class="temperature mb-3" style="font-size: 50px;">17°C</h2>
+            <h2 class="temperature mb-3" style="font-size: 50px;">15°C</h2>
             <v-btn color="primary" rounded @click="onSeeMoreClick('Cagayan De Oro City')" class="see-more">
               <h4 style="font-size: 11px;">Set default</h4>
             </v-btn>
@@ -198,11 +198,11 @@ export default {
     return {
       selectedCity: 'Butuan City', 
       cityWeather: {
-        'Butuan City': { temperature: 28, condition: 'Sunny', icon: '/imgs/sun.png' },
-        'Baguio City': { temperature: 18, condition: 'Cloudy', icon: '/imgs/storm.png' },
+        'Butuan City': { temperature: 25, condition: 'Sunny', icon: '/imgs/sun.png' },
+        'Baguio City': { temperature: 18, condition: 'Rainy', icon: '/imgs/rain.png' },
         'Manila': { temperature: 32, condition: 'Sunny', icon: '/imgs/sun.png' },
-        'Cebu City': { temperature: 32, condition: 'Rainy', icon: '/imgs/rain.png' },
-        'Cagayan De Oro City': { temperature: 17, condition: 'Stormy', icon: '/imgs/storm.png' },
+        'Cebu City': { temperature: 26, condition: 'Sunny', icon: '/imgs/sun.png' },
+        'Cagayan De Oro City': { temperature: 15, condition: 'Stormy', icon: '/imgs/storm.png' },
       }, // Sample weather data for each city
       hourlyForecast: [
         { hour: '7:00 AM', image: '/imgs/rain.png', temperature: 18 },

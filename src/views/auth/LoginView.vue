@@ -103,16 +103,11 @@ import RegisterForm from '@/components/auth/RegisterForm.vue';
                           <v-icon><i class="fa-brands fa-linkedin" style="color: #166bda;"></i></v-icon>
                         </v-icon>
                       </div>
-                      <!-- <h4 class="text-center mt-4 mb-5">Ensure your email for registration</h4> -->
+                      
 
                       <RegisterForm></RegisterForm>
 
                     </v-card-text>
-                    <!-- <div class="text-center mt-3 mb-10">
-                      <v-btn rounded
-                        style="background: linear-gradient(to bottom right, rgba(135, 206, 250, 1), rgba(176, 224, 230, 1));">SIGN
-                        UP</v-btn>
-                    </div> -->
                   </v-col>
                 </v-row>
               </v-window-item>

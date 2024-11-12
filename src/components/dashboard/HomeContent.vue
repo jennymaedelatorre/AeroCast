@@ -16,7 +16,7 @@
             <v-card-text class="mb-5">
               <v-row align="center" no-gutters>
                 <v-col class="text-h2" cols="6" style="font-weight: bolder;">
-                  25&deg;C
+                  {{ unitsStore.convertedTemp }}&deg;{{ unitsStore.tempUnit }}
                 </v-col>
                 <v-col class="weather-icon text-right" cols="6">
                   <img src="/imgs/sun.png" alt="Weather" width="150" />
@@ -29,27 +29,76 @@
         <!-- Today's Forecast Card -->
         <v-card class="forecast mx-auto mt-4 text-white" elevation="0">
           <v-card-title style="font-size: 16px; margin: 10px 0 5px 30px; color:gray;">Today's Hourly
-            Forecast</v-card-title>
+            Forecast
+          </v-card-title>
 
           <v-card-text>
             <div class="overflow-x-hidden">
               <div class="d-flex overflow-x-auto hide-scrollbar">
-                <v-col v-for="(time, index) in hourlyForecast" :key="time.hour" cols="auto">
-                  <div class="d-flex align-center">
+                <v-col v-for="(time, index) in hourlyForecast" :key="time.hour" cols="auto" class="hour-details">
+
+                  <v-btn class="forecast-item-btn" style="background: none; box-shadow: none;"
+                    @click="showDetails(time)" outlined>
                     <div class="forecast-item text-center">
                       <div style="color:gray">{{ time.hour }}</div>
                       <img :src="time.image" alt="Weather" width="50" />
-                      <div style="font-size: 18px; font-weight: bolder;">{{ time.temperature
-                        }}&deg;C</div>
+                      <div style="font-size: 18px; font-weight: bolder;">
+                        {{ time.temperature }}&deg;{{ unitsStore.tempUnit }}
+                      </div>
                     </div>
-                    <!-- Add vertical divider only if not the last item -->
-                    <div v-if="index < hourlyForecast.length - 1" class="divider"></div>
-                  </div>
+                  </v-btn>
+
+                  <div v-if="index < hourlyForecast.length - 1" class="divider"></div>
                 </v-col>
               </div>
             </div>
           </v-card-text>
         </v-card>
+
+        <!-- Modal (v-dialog) for Detailed Weather Info -->
+        <v-dialog v-model="dialog" max-width="500px" persistent>
+  <v-card class="rounded-lg" elevation="10" style="background-color: #2a2e3b; color: white; border-radius: 20px;">
+    <v-card-title class="headline" style="font-size: 16px; font-weight: bold; padding:30px">
+      Weather Details for {{ selectedTime.hour }}
+    </v-card-title>
+
+    <v-card-text>
+      <v-row>
+
+        <v-col cols="6">
+          <div class="weather-detail-item">
+            <strong>Temperature:</strong> {{ selectedTime.temperature }}&deg;{{ unitsStore.tempUnit }}
+          </div>
+          <div class="weather-detail-item">
+            <strong>Air Quality:</strong> {{ selectedTime.airQuality }}
+          </div>
+          <div class="weather-detail-item">
+            <strong>Wind Speed:</strong> {{ selectedTime.windSpeed }} km/h
+          </div>
+        </v-col>
+
+       
+        <v-col cols="6">
+          <div class="weather-detail-item">
+            <strong>UV Index:</strong> {{ selectedTime.uvIndex }}
+          </div>
+          <div class="weather-detail-item">
+            <strong>Humidity:</strong> {{ selectedTime.humidity }}%
+          </div>
+        </v-col>
+      </v-row>
+    </v-card-text>
+
+    
+    <v-card-actions class="justify-center mb-5" style="">
+      <v-btn @click="dialog = false" style="min-width: 150px; background-color: #3f51b5; color:white;">
+        Close
+      </v-btn>
+    </v-card-actions>
+  </v-card>
+</v-dialog>
+
+
 
         <!-- Activity Suggestion Carousel-->
         <v-container class="suggestions">
@@ -112,7 +161,8 @@
                       <v-icon class="mr-2" size="28">mdi-speedometer</v-icon>
                       <span style="color: gray; font-size: 15px;">Air Pressure</span>
                     </div>
-                    <strong class="temperature-value" style="font-size: 20px;">1009 hPa</strong>
+                    <strong class="temperature-value" style="font-size: 20px;">{{ unitsStore.convertedPressure }} {{
+                      unitsStore.pressureUnit }}</strong>
                   </div>
                 </v-col>
 
@@ -130,8 +180,8 @@
                       <v-icon class="mr-2" size="28">mdi-weather-windy</v-icon>
                       <span style="color: gray; font-size: 15px;">Wind</span>
                     </div>
-                    <strong class="temperature-value" style="font-size: 20px;">0.2
-                      <i>Km/h</i></strong>
+                    <strong class="temperature-value" style="font-size: 20px;"> {{ unitsStore.convertedWindSpeed }}
+                      <i>{{ unitsStore.windSpeedUnit }}</i></strong>
                   </div>
 
                   <div class="d-flex flex-column mt-4">
@@ -209,7 +259,8 @@
                       <span style="color:gray">{{ day.date }}</span>
                       <img :src="getWeatherIcon(day.temperature)" alt="Weather Icon"
                         style="width: 40px; height: 40px; margin-right: 8px;" />
-                      <span class="ml" style="font-size: 20px;"><strong>{{ day.temperature }}°C</strong></span>
+                      <span class="ml" style="font-size: 20px;"><strong>{{ day.temperature }}°{{ unitsStore.tempUnit
+                          }}</strong></span>
                     </div>
                   </v-list-item-title>
                 </v-list-item-content>
@@ -292,6 +343,12 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { useUnitsStore } from '@/stores/unit';
+
+// Use the Pinia store
+const unitsStore = useUnitsStore();
+
+
 import cloudyIcon from '/imgs/4.png';
 import sunnyIcon from '/imgs/sun.png';
 import stormyIcon from '/imgs/storm.png';
@@ -299,9 +356,9 @@ import rainyIcon from '/imgs/rain.png';
 
 // Define the hourly forecast data
 const hourlyForecast = ref([
-  { hour: '6:00 AM', image: cloudyIcon, temperature: 24 },
-  { hour: '7:00 AM', image: cloudyIcon, temperature: 28 },
-  { hour: '8:00 AM', image: sunnyIcon, temperature: 32 },
+  { hour: '6:00 AM', image: cloudyIcon, temperature: 24, airQuality: 'Good', uvIndex: 5, windSpeed: 15, humidity: 60  },
+  { hour: '7:00 AM', image: cloudyIcon, temperature: 28, airQuality: 'Moderate', uvIndex: 4, windSpeed: 10, humidity: 65 },
+  { hour: '8:00 AM', image: sunnyIcon, temperature: 32, airQuality: 'Unhealthy', uvIndex: 2, windSpeed: 20, humidity: 80  },
   { hour: '9:00 AM', image: rainyIcon, temperature: 15 },
   { hour: '10:00 AM', image: rainyIcon, temperature: 18 },
   { hour: '11:00 AM', image: sunnyIcon, temperature: 22 },
@@ -341,6 +398,15 @@ const getWeatherIcon = (temperature) => {
   }
 };
 
+// For managing the modal dialog
+const dialog = ref(false) 
+const selectedTime = ref({})  
+
+// Function to handle when an hourly forecast item is clicked
+function showDetails(time) {
+  selectedTime.value = time  
+  dialog.value = true        
+}
 
 const onSeeMoreClick = () => {
   alert("See More button clicked!");
@@ -348,7 +414,7 @@ const onSeeMoreClick = () => {
 
 // Define activity suggestions based on weather conditions
 const activitySuggestions = ref([]);
-const weatherCondition = 'sunny'; // Example weather condition
+const weatherCondition = 'sunny'; 
 
 const loadActivitiesBasedOnWeather = () => {
   if (weatherCondition === 'sunny') {
@@ -423,9 +489,9 @@ const currentQuote = ref('');
 const currentAuthor = ref('');
 let index = 0;
 
-// Define intervals for air quality and quotes
+
 let airQualityInterval;
-let quoteInterval; // Declare quoteInterval
+let quoteInterval; 
 
 const updateQuote = () => {
   currentQuote.value = quotes.value[index].text;
@@ -433,16 +499,16 @@ const updateQuote = () => {
   index = (index + 1) % quotes.value.length;
 };
 
-// Lifecycle hook to run the function when the component is mounted
+
 onMounted(() => {
   generateRandomAirQuality();
   airQualityInterval = setInterval(generateRandomAirQuality, 5000);
   loadActivitiesBasedOnWeather();
   updateQuote();
-  quoteInterval = setInterval(updateQuote, 5000);
+  quoteInterval = setInterval(updateQuote, 3000);
 });
 
-// Cleanup interval on component unmount
+
 onBeforeUnmount(() => {
   clearInterval(airQualityInterval);
   clearInterval(quoteInterval);
@@ -452,6 +518,21 @@ onBeforeUnmount(() => {
 
 
 <style scoped>
+.forecast-item-btn{
+  color:white;
+  margin-left: 10px;
+}
+.weather-detail-item {
+  margin: 10px 0;
+  font-size: 16px;
+  color: #b0bec5;
+  margin-left: 10px;
+}
+
+.weather-detail-item strong {
+  color: #fff;
+}
+
 .weather {
   background-color: transparent;
   color: white;
