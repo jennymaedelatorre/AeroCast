@@ -11,10 +11,10 @@ import L from 'leaflet';
 
 const locations = ref([
   { name: 'Manila', temperature: 32, coords: [14.5995, 120.9842], icon: '/imgs/sun.png' },
-  { name: 'Butuan City', temperature: 28, coords: [8.9475, 125.5406], icon: '/imgs/rain.png' },
-  { name: 'Cebu City', temperature: 26, coords: [10.3157, 123.8854], icon: '/imgs/rain.png' },
-  { name: 'Cagayan de Oro City', temperature: 17, coords: [8.4542, 124.6319], icon: '/imgs/storm.png' },
-  { name: 'Baguio City', temperature: 18, coords: [16.4023, 120.5969], icon: '/imgs/storm.png' },
+  { name: 'Butuan City', temperature: 25, coords: [8.9475, 125.5406], icon: '/imgs/sun.png' },
+  { name: 'Cebu City', temperature: 26, coords: [10.3157, 123.8854], icon: '/imgs/sun.png' },
+  { name: 'Cagayan de Oro City', temperature: 15, coords: [8.4542, 124.6319], icon: '/imgs/storm.png' },
+  { name: 'Baguio City', temperature: 18, coords: [16.4023, 120.5969], icon: '/imgs/rain.png' },
 ]);
 
 const map = ref(null);

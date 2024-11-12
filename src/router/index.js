@@ -5,6 +5,7 @@ import DashboardView from '@/views/system/DashboardView.vue'; // Layout with sid
 import HomeContent from '@/components/dashboard/HomeContent.vue';
 import MapContent from '@/components/dashboard/MapContent.vue';
 import LocationContent from '@/components/dashboard/LocationContent.vue';
+import CalendarContent from '@/components/dashboard/CalendarContent.vue';
 import SettingContent from '@/components/dashboard/SettingContent.vue';
 
 const router = createRouter({
@@ -21,32 +22,37 @@ const router = createRouter({
       component: RegisterView,
     },
     {
-      path: '/dashboard', // Main dashboard route (layout with sidebar)
+      path: '/dashboard',
       name: 'dashboard',
-      component: DashboardView, // This component will contain the sidebar and content area
+      component: DashboardView, 
       children: [
         {
-          path: 'home',  // Route for the Home content
+          path: 'home', 
           name: 'home',
           component: HomeContent,
         },
         {
-          path: 'map',  // Route for the Map content
+          path: 'map',  
           name: 'map',
           component: MapContent,
         },
         {
-          path: 'location',  // Route for the Location content
+          path: 'location',  
           name: 'location',
           component: LocationContent,
         },
         {
-          path: 'settings',  // Route for the Settings content
+          path: 'calendar',  
+          name: 'calendar',
+          component: CalendarContent,
+        },
+        {
+          path: 'settings',  
           name: 'settings',
           component: SettingContent,
         },
         {
-          path: '',  // Default route (when no specific path is matched)
+          path: '',  
           redirect: '/dashboard/home',
         },
       ],
