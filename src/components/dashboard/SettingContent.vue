@@ -160,7 +160,7 @@
     <v-card class="logout-card text-white mt-8 mb-8" style="background-color:#2a2e3b; border-radius: 30px; padding: 20px;">
       <v-row>
         <v-col cols="11"> <v-card-title class="logout-header" style="color: gray;">Log out</v-card-title></v-col>
-        <router-link to="/login" class="logout-icon-link">
+        <router-link to="/" class="logout-icon-link">
             <v-icon size="24" class="pt-8 pl-10">mdi-logout</v-icon>
           </router-link>
       </v-row>
