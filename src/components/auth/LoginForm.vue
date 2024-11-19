@@ -1,22 +1,55 @@
 <script setup>
+
   import { ref } from 'vue'
   import { requiredValidator, emailValidator } from '@/utils/validators';
+  import { supabase,formActionDefault } from '@/utils/supabase';
+  import { useRouter } from 'vue-router';
+  import AlertNotification from '@/components/common/AlertNotification.vue';
 
-  const visible = ref(false)
+  // Utilize pre-defined vue  functions
+  const router = useRouter()
 
-  const refVform = ref()
-
+  // Load Variables
   const formDataDefault = {
     email: '',
     password: '',
   }
-
   const formData = ref({
     ...formDataDefault
   })
+  const formAction = ref({
+    ...formActionDefault
+  })
+  const visible = ref(false)
+  const refVform = ref()
 
-  const onSubmit = () => {
-    alert(formData.value.password)
+  const onSubmit = async () => {
+    // Reset Form Action utils
+    formAction.value = {... formActionDefault}
+    // Turn on processing
+    formAction.value.formProcess = true
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: formData.value.email,
+      password: formData.value.password
+    })
+
+    if(error){
+      // console.log(error) Add Error Message and Status Code
+      formAction.value.formErrorMessage = error.message
+      formAction.value.formStatus = error.status
+    }
+    else if(data){
+      // console.log(data) Add Success Message 
+      formAction.value.formSuccessMessage = 'Successfully Logged Account.'
+      // Add here more actions if you want
+      router.replace('/dashboard')
+    }
+
+    // Reset Form
+    refVform.value?.reset()
+    // Turn off Processing
+    formAction.value.formProcess = false
   }
 
   const onFormSubmit = () => {
@@ -28,6 +61,12 @@
 
 
 <template>
+
+  <AlertNotification 
+    :form-success-message="formAction.formSuccessMessage"
+    :form-error-message="formAction.formErrorMessage"
+  ></AlertNotification>  
+
   <v-form ref="refVform" fast-fail @submit.prevent="onFormSubmit" class="text-slide-down">
       <v-text-field 
       v-model="formData.email"
