@@ -1,13 +1,13 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import LoginView from '@/views/auth/LoginView.vue';
 import RegisterView from '@/views/auth/RegisterView.vue';
-import DashboardView from '@/views/system/DashboardView.vue'; // Layout with sidebar
-import HomeContent from '@/components/dashboard/HomeContent.vue';
-import MapContent from '@/components/dashboard/MapContent.vue';
-import LocationContent from '@/components/dashboard/LocationContent.vue';
-import CalendarContent from '@/components/dashboard/CalendarContent.vue';
-import SettingContent from '@/components/dashboard/SettingContent.vue';
-// import { isAuthenticated } from '@/utils/supabase';
+import HomeContent from '@/views/system/dashboard/HomeContent.vue';
+import MapContent from '@/views/system/dashboard/MapContent.vue';
+import LocationContent from '@/views/system/dashboard/LocationContent.vue';
+import CalendarContent from '@/views/system/dashboard/CalendarContent.vue';
+import SettingContent from '@/views/system/dashboard/SettingContent.vue';
+import DashboardView from '@/views/system/DashboardView.vue';
+import { isAuthenticated } from '@/utils/supabase';
 
 
 const router = createRouter({
@@ -62,19 +62,23 @@ const router = createRouter({
   ],
 });
 
-// router.beforeEach( async (to) => {
-//   const isLoggedin = await isAuthenticated()
+router.beforeEach( async (to) => {
+  const isLoggedIn = await isAuthenticated()
   
-//   // Redirect to appropriate page if accessing home route
-//   if (to.name === 'home') {
-//     return isLoggedIn ? { name: 'dashboard' } : { name: 'login' }
-//   }
+  // Redirect to appropriate page if accessing home route
+  // if (to.name === 'home') {
+  //   return isLoggedIn ? { name: 'dashboard/home' } : { name: 'login' }
+  // }
+    // Redirect unauthenticated users accessing dashboard routes
+    if (to.path.startsWith('/dashboard') && !isLoggedIn) {
+      return { name: 'login' };
+    }
 
-//   // Check if the user is logged in
-//   if (isLoggedIn && (to.name === 'login' || to.name === 'register')) {
-//     // redirect the user to the dashboard page
-//     return { name: 'dashboard' }
-//   }
+  // Check if the user is logged in
+  if (isLoggedIn && (to.name === 'login' || to.name === 'register')) {
+    // redirect the user to the dashboard page
+    return { name: 'dashboard' }
+  }
 
 //   // If not logged in and going to system pages
 //   if (!isLoggedIn && to.path.startsWith('/system')) {
@@ -87,6 +91,6 @@ const router = createRouter({
 //   //   return { name: '404' }
 //   // }
 
-// })
+})
 
 export default router;
