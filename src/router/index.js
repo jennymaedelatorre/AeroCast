@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import LoginView from '@/views/auth/LoginView.vue';
-import RegisterView from '@/views/auth/RegisterView.vue';
+// import RegisterView from '@/views/auth/RegisterView.vue';
 import HomeContent from '@/views/system/HomeContent.vue';
 import MapContent from '@/views/system/MapContent.vue';
 import LocationContent from '@/views/system/LocationContent.vue';
@@ -8,6 +8,7 @@ import CalendarContent from '@/views/system/CalendarContent.vue';
 import SettingContent from '@/views/system/SettingContent.vue';
 import DashboardView from '@/views/system/DashboardView.vue';
 import { isAuthenticated } from '@/utils/supabase';
+import NotFoundView from '@/views/errors/NotFoundView.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -59,6 +60,19 @@ const router = createRouter({
         },
       ],
     },
+          // Errors Pages
+  // {
+  //   path: '/forbidden',
+  //   name: 'forbidden',
+  //   component: ForbiddenView,
+  //   meta: { isDefault: true }
+  // },
+  {
+    path: '/:catchAll(.*)',
+    name: 'not-found',
+    component: NotFoundView,
+    meta: { isDefault: true }
+  }
   ],
 });
 
