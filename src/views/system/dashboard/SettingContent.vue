@@ -157,14 +157,14 @@
       </v-card>
     </v-dialog>
 
-    <router-link to="/" class="logout-icon-link">
-      <v-card class="logout-card text-white mt-8 mb-8" style="background-color:#2a2e3b; border-radius: 30px; padding: 20px;">
-        <v-row>
-          <v-col cols="11"> <v-card-title class="logout-header">Log out</v-card-title></v-col>        
-              <v-icon size="24" class="pt-8 pl-10">mdi-logout</v-icon>
-        </v-row>
-      </v-card>
-    </router-link>
+     <!-- Logout Card -->
+     <v-card class="logout-card text-white mt-8" style="background-color:#2a2e3b; border-radius: 30px; padding: 20px;" @click="onLogout" :loading="formAction.formProcess" :disabled="formAction.formProcess">
+      <v-row>
+        <v-col cols="11"><v-card-title class="logout-header">Log out</v-card-title></v-col>
+        <v-col cols="1"><v-icon size="24" class="pt-5 pl-5">mdi-logout</v-icon></v-col>
+      </v-row>
+    </v-card>
+    
     
   </v-container>
 </template>
@@ -172,6 +172,8 @@
   
 <script setup>
 import { useUnitsStore } from '@/stores/unit';
+import { supabase, formActionDefault } from '@/utils/supabase';
+import { useRouter } from 'vue-router';
 
 const unitsStore = useUnitsStore();
 import { ref } from 'vue';
@@ -191,6 +193,25 @@ function toggleNotification() {
     dialogMessage.value = "You will no longer receive weather notifications.";
   }
 }
+
+// Logout function
+const router = useRouter();
+const formAction = ref({ ...formActionDefault });
+
+const onLogout = async () => {
+  formAction.value.formProcess = true;
+
+  const { error } = await supabase.auth.signOut();
+  if (error) {
+    console.error('Error during logout:', error.message);
+    formAction.value.formProcess = false;
+    return;
+  }
+
+  formAction.value.formProcess = false;
+  router.replace('/');
+};
+
 </script>
 
 <style scoped>

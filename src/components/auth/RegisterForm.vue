@@ -157,10 +157,27 @@
             </v-row>
 
             <div class="text-center mt-3 mb-10">
-                <v-btn rounded
+                <!-- <v-btn rounded
                     type="submit"
                     class="custom-btn-gradient">SIGN UP
-                </v-btn>
+                </v-btn> -->  
+              <v-btn
+              rounded
+              type="submit"
+              class="custom-btn-gradient"
+              :disabled="formAction.formProcess"
+               > <!-- Disable if loading -->
+              <template v-if="!formAction.formProcess">
+                SIGN UP
+              </template>
+              <template v-else>
+                <v-progress-circular
+                  indeterminate
+                  color="white"
+                  size="20"
+                ></v-progress-circular>
+              </template>
+          </v-btn>
             </div>
         </v-container>
     </v-form>
