@@ -56,9 +56,9 @@
     }
     else if(data){
       // console.log(data) Add Success Message 
-      formAction.value.formSuccessMessage = 'Successfully Registered Account.'
+      formAction.value.formSuccessMessage = 'Successfully Registered! You can now log in.'
       // Add here more actions if you want
-      router.replace('/dashboard')
+      router.replace('/login')
     }
 
     // Reset Form

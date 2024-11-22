@@ -14,7 +14,7 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      redirect: '/login', // Remove component to avoid conflict
+      redirect: '/login', 
     },
     {
       path: '/login',
