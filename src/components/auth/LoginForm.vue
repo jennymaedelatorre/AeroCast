@@ -42,8 +42,10 @@
     else if(data){
       // console.log(data) Add Success Message 
       formAction.value.formSuccessMessage = 'Successfully Logged Account.'
-      // Add here more actions if you want
-      router.replace('/dashboard')
+     
+        setTimeout(() => {
+        router.replace("/dashboard");
+      }, 1000);
     }
 
     // Reset Form
