@@ -1,5 +1,5 @@
 <template>
-  <v-container class="text-white">
+  <v-container class="setting-container text-white">
     <v-card class="units-cards text-white" height="auto" style="background-color:#2a2e3b; border-radius: 30px; padding: 20px;"> 
       <v-card-title>Units</v-card-title>         
       <v-card-text>
