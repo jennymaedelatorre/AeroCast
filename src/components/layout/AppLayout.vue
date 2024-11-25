@@ -15,7 +15,7 @@
           <router-view />
         </v-main>
         
-        <!-- Bottom Navigation for Mobile (only visible on mobile) -->
+        <!-- Bottom Navigation for Mobile -->
         <v-bottom-navigation
           v-if="isMobile"
           v-model="value"
@@ -58,13 +58,13 @@ import { ref, computed } from 'vue'
 import { useDisplay } from 'vuetify'
 import SideBar from '@/components/layout/SideBar.vue'
 
-// Detect screen size
+
 const { smAndDown } = useDisplay()
 const isMobile = computed(() => smAndDown.value)
 
-// Bottom navigation state
-const value = ref(0) // Keeps track of the active bottom nav item
-const color = ref('#2a2e3b') // Background color of bottom nav
+
+const value = ref(0) 
+const color = ref('#2a2e3b') 
 </script>
 
 <style scoped>
