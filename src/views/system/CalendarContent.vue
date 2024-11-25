@@ -1,8 +1,10 @@
 <template>
-    <v-container class="text-white">
-      <v-card class="units-cards text-white" height="auto" style="background-color:#2a2e3b; border-radius: 30px; padding: 20px;"> 
-        <FullCalendar :options="calendarOptions" />
-      </v-card>
+    <v-container class="calendar text-white">
+        <v-col>
+          <v-card class="calendar-card text-white" height="auto" style="background-color:#2a2e3b; border-radius: 30px; padding: 40px;"> 
+            <FullCalendar :options="calendarOptions" />
+          </v-card>
+        </v-col>
     </v-container>
   </template>
   
@@ -29,6 +31,9 @@
   </script>
   
   <style scoped>
-  /* Optional: Add specific styles for LocationContent */
+  .calendar{
+    margin-top:-40px;
+    margin-left: 0;
+  }
   </style>
   

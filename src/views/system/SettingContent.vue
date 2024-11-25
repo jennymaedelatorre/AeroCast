@@ -40,12 +40,6 @@
                   :color="unitsStore.windSpeedUnit === 'm/s' ? '#2a2e3b' : '#191d2c'" 
                   @click="unitsStore.setWindSpeedUnit('m/s')">m/s</v-btn>
               </v-col>
-              <v-divider vertical style="width: 1px;background-color: #4c4949;"></v-divider>
-              <v-col>
-                <v-btn block class="switch-btn"
-                  :color="unitsStore.windSpeedUnit === 'knots' ? '#2a2e3b' : '#191d2c'" 
-                  @click="unitsStore.setWindSpeedUnit('knots')">Knots</v-btn>
-              </v-col>
             </v-row>
           </v-card>
 
@@ -59,18 +53,6 @@
                 <v-btn block class="switch-btn"
                   :color="unitsStore.pressureUnit === 'hPa' ? '#2a2e3b' : '#191d2c'" 
                   @click="unitsStore.setPressureUnit('hPa')">hPa</v-btn>
-              </v-col>
-              <v-divider vertical style="width: 1px;background-color: #4c4949;"></v-divider>
-              <v-col>
-                <v-btn block class="switch-btn"
-                  :color="unitsStore.pressureUnit === 'inches' ? '#2a2e3b' : '#191d2c'" 
-                  @click="unitsStore.setPressureUnit('inches')">Inches</v-btn>
-              </v-col>
-              <v-divider vertical style="width: 1px;background-color: #4c4949;"></v-divider>
-              <v-col>
-                <v-btn block class="switch-btn"
-                  :color="unitsStore.pressureUnit === 'kPa' ? '#2a2e3b' : '#191d2c'" 
-                  @click="unitsStore.setPressureUnit('kPa')">kPa</v-btn>
               </v-col>
               <v-divider vertical style="width: 1px;background-color: #4c4949;"></v-divider>
               <v-col>
@@ -215,6 +197,10 @@ const onLogout = async () => {
 </script>
 
 <style scoped>
+  .setting-container{
+    margin-top: -30px;
+    margin-left: 10px;
+  }
   .switch {
    background-color:#191d2c;
    margin-left: 30px;
