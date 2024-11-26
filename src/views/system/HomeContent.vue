@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid class="text-white" style="margin-top: -20px;">
+  <v-container fluid class="text-white mb-16" style="margin-top: -20px;">
     <v-row>
       <v-col cols="12" lg="8">
         <v-text-field label="Search for Cities" filled dense rounded solo flat background-color="grey lighten-3"
@@ -15,7 +15,7 @@
 
             <v-card-text class="mb-5">
               <v-row align="center" no-gutters>
-                <v-col class="text-h2" cols="6" style="font-weight: bolder;">
+                <v-col class="text-h1 temp-font" cols="6" style="font-weight: bolder;">
                   {{ unitsStore.convertedTemp }}&deg;{{ unitsStore.tempUnit }}
                 </v-col>
                 <v-col class="weather-icon text-right" cols="6">
@@ -124,9 +124,6 @@
             <v-card-title class="d-flex justify-space-between align-center"
               style="font-size: 16px; margin: 0px 0 5px 10px; color:gray">
               <span>Weather Conditions</span>
-              <v-btn color="primary" rounded @click="onSeeMoreClick" class="see-more">
-                <h4 style="font-size: 10px;">See More</h4>
-              </v-btn>
             </v-card-title>
             <v-divider></v-divider>
             <v-card-text>
@@ -323,7 +320,7 @@
         </v-card>
 
         <!-- Qoute Carddddd -->
-        <v-card class="quote-card text-white mt-8" height="330px"
+        <v-card class="quote-card text-white mt-8 mb-16" height="330px"
           style="display: flex; justify-content: center; align-items: center; background-color:#2a2e3b; border-radius: 30px;">
           <div class="weather-quote" style="text-align: center; padding: 50px;">
             <blockquote>
@@ -518,6 +515,11 @@ onBeforeUnmount(() => {
 
 
 <style scoped>
+@media (max-width: 600px) {
+  .temp-font {
+    font-size: 55px !important;; 
+  }
+}
 .forecast-item-btn{
   color:white;
   margin-left: 10px;
@@ -552,7 +554,7 @@ onBeforeUnmount(() => {
 .qoute-card {
   margin-top: 20px;
   background-color: #2a2e3b;
-  border-radius: 30px;
+  border-radius: 20px;
 }
 
 .forecast-item {

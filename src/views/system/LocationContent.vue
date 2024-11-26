@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid class="text-white" style="margin-top: -20px;">
+  <v-container fluid class="text-white mb-16" style="margin-top: -20px;">
     <v-row>
       <v-col cols="12" lg="8">
         <v-text-field label="Search for Cities" filled dense rounded solo flat background-color="grey lighten-3"
@@ -161,7 +161,7 @@
   </v-card>
 
   <!-- 3-Day Weather Forecast -->
-  <v-card class="forecast-card text-white" elevation="0" style="background-color: #2a2e3b; padding: 20px; margin-top: 20px;" v-if="selectedCity">
+  <v-card class="forecast-card text-white mb-16" elevation="0" style="background-color: #2a2e3b; padding: 20px; margin-top: 20px;" v-if="selectedCity">
     <v-card-title style="font-size: 16px; text-align: center; margin-bottom: 20px; margin-top: 10px; color: gray;">
       <v-icon left class="mr-2">mdi-calendar</v-icon>
       3-Day Weather Forecast
@@ -258,7 +258,7 @@ export default {
 .forecast-card{
   margin-top: 20px;
   background-color: #2a2e3b;
-  border-radius: 30px;
+  border-radius: 20px;
 }
 
 .forecast-item {
@@ -288,5 +288,37 @@ export default {
 
 .temperature-value {
   margin-left: 40px;
+}
+@media (max-width: 600px) {
+  .city-card {
+    height: 150px !important; 
+    padding: 10px;
+  }
+  .weather-icon{
+    padding-top: 50px;
+  }
+  .weather-icon img {
+    width: 80px !important; 
+  }
+
+  .city-card h2 {
+    font-size: 20px !important; 
+  }
+  
+  .see-more h4 {
+    font-size: 9px !important;
+  }
+
+  .forecast img {
+    width: 40px !important; 
+  }
+
+  .forecast-card {
+    padding: 10px !important; 
+  }
+
+  .forecast-card span {
+    font-size: 14px !important; 
+  }
 }
 </style>

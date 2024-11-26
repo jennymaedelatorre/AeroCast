@@ -1,5 +1,5 @@
 <template>
-  <v-container class="setting-container text-white">
+  <v-container class="setting-container text-white mb-16">
     <v-card class="units-cards text-white" height="auto"
       style="background-color:#2a2e3b; border-radius: 20px; padding: 8px;">
       <v-card-title style="font-weight: bolder;">Units</v-card-title>
@@ -112,7 +112,7 @@
     </v-dialog>
 
     <!-- Logout Card -->
-    <v-card class="logout-card text-white mt-5 " style="background-color:#2a2e3b; border-radius: 20px; padding: 20px;"
+    <v-card class="logout-card text-white mt-5 mb-16" style="background-color:#2a2e3b; border-radius: 20px; padding: 20px;"
       @click="onLogout" :loading="formAction.formProcess" :disabled="formAction.formProcess">
       <v-row align="center" class="d-flex">
         <v-col cols="auto" class="d-flex align-center">
