@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid class="text-white" style="margin-top: -20px;">
+  <v-container fluid class="text-white mb-16" style="margin-top: -20px;">
     <v-row>
       <v-col cols="12" lg="8">
         <v-text-field label="Search for Cities" filled dense rounded solo flat background-color="grey lighten-3"
