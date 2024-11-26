@@ -1,5 +1,5 @@
 <template>
-  <v-card class="map-content" style="margin-top: -20px;">
+  <v-card class="map-content mb-16">
     <div id="map" class="map"></div>
   </v-card>
 </template>
@@ -20,7 +20,11 @@ const locations = ref([
 const map = ref(null);
 
 onMounted(() => {
-  map.value = L.map('map').setView([12.8797, 121.7740], 6);
+  map.value = L.map('map', {
+    center: [12.8797, 121.7740],
+    zoom: 6,
+    zoomControl: true,
+  });
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
@@ -36,23 +40,29 @@ onMounted(() => {
       </div>
     `;
 
-    const marker = L.marker(location.coords).addTo(map.value)
-      .bindPopup(popupContent);
+    const marker = L.marker(location.coords).addTo(map.value).bindPopup(popupContent);
 
-    // Open the popup immediately after adding the marker
+    // Optionally open the popup by default
     marker.openPopup();
   });
+
+  // Ensure the map adjusts to the container size
+  setTimeout(() => {
+    map.value.invalidateSize();
+  }, 0);
 });
 </script>
 
+
 <style scoped>
 .map-content {
-  border-radius: 30px;
-  width: 98%;
-  margin-left: 15px;
+  border-radius: 20px;
+  width: 95%;
+  margin-left: 10px;
+  margin-right: 10px;
 }
 .map {
-  height: 900px;
+  height: 100vh;
 }
 .location-card {
   background: rgba(255, 255, 255, 0.8);
