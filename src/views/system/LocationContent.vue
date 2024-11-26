@@ -161,7 +161,7 @@
   </v-card>
 
   <!-- 3-Day Weather Forecast -->
-  <v-card class="forecast-card text-white mb-16" elevation="0" style="background-color: #2a2e3b; padding: 20px; margin-top: 20px;" v-if="selectedCity">
+  <v-card class="forecast-card text-white" elevation="0" style="background-color: #2a2e3b; padding: 20px; margin-top: 20px;" v-if="selectedCity">
     <v-card-title style="font-size: 16px; text-align: center; margin-bottom: 20px; margin-top: 10px; color: gray;">
       <v-icon left class="mr-2">mdi-calendar</v-icon>
       3-Day Weather Forecast
