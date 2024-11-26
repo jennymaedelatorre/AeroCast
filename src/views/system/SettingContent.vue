@@ -1,128 +1,100 @@
 <template>
   <v-container class="setting-container text-white">
-    <v-card class="units-cards text-white" height="auto" style="background-color:#2a2e3b; border-radius: 30px; padding: 20px;"> 
-      <v-card-title>Units</v-card-title>         
+    <v-card class="units-cards text-white" height="auto"
+      style="background-color:#2a2e3b; border-radius: 20px; padding: 8px;">
+      <v-card-title style="font-weight: bolder;">Units</v-card-title>
       <v-card-text>
-          <!-- Temperature -->
-          <v-row>
-            <v-text class="." style="margin-left: 20px; padding: 20px; color:gray;">Temperature</v-text>
+        <!-- Temperature -->
+        <v-row>
+          <v-text class="." style="padding: 20px; color:gray;">Temperature</v-text>
+        </v-row>
+        <v-card class="switch">
+          <v-row v-model="value" active>
+            <v-col>
+              <v-btn block class="switch-btn" :color="unitsStore.tempUnit === 'C' ? '#2a2e3b' : '#191d2c'"
+                @click="unitsStore.setTempUnit('C')">Celsius</v-btn>
+            </v-col>
+            <v-divider vertical style="width: 1px;background-color: #4c4949;"></v-divider>
+            <v-col>
+              <v-btn block class="switch-btn" :color="unitsStore.tempUnit === 'F' ? '#2a2e3b' : '#191d2c'"
+                @click="unitsStore.setTempUnit('F')">Fahrenheit</v-btn>
+            </v-col>
           </v-row>
-          <v-card class="switch">
-            <v-row v-model="value" active>
-              <v-col>
-                <v-btn block class="switch-btn"
-                  :color="unitsStore.tempUnit === 'C' ? '#2a2e3b' : '#191d2c'" 
-                  @click="unitsStore.setTempUnit('C')">Celsius</v-btn>
-              </v-col>
-              <v-divider vertical style="width: 1px;background-color: #4c4949;"></v-divider>
-              <v-col>
-                <v-btn block class="switch-btn"
-                  :color="unitsStore.tempUnit === 'F' ? '#2a2e3b' : '#191d2c'" 
-                  @click="unitsStore.setTempUnit('F')">Fahrenheit</v-btn>
-              </v-col>
-            </v-row>
-          </v-card>
+        </v-card>
 
-          <!-- Wind Speed -->
+        <!-- Wind Speed -->
+        <v-row>
+          <v-text class="." style="padding: 20px; color:gray;">Wind Speed</v-text>
+        </v-row>
+        <v-card class="switch">
           <v-row>
-            <v-text class="." style="margin-left: 20px; padding: 20px; color:gray;">Wind Speed</v-text>
+            <v-col>
+              <v-btn block class="switch-btn" :color="unitsStore.windSpeedUnit === 'km/h' ? '#2a2e3b' : '#191d2c'"
+                @click="unitsStore.setWindSpeedUnit('km/h')">km/h</v-btn>
+            </v-col>
+            <v-divider vertical style="width: 1px;background-color: #4c4949;"></v-divider>
+            <v-col>
+              <v-btn block class="switch-btn" :color="unitsStore.windSpeedUnit === 'm/s' ? '#2a2e3b' : '#191d2c'"
+                @click="unitsStore.setWindSpeedUnit('m/s')">m/s</v-btn>
+            </v-col>
           </v-row>
-          <v-card class="switch">
-            <v-row>
-              <v-col>
-                <v-btn block class="switch-btn"
-                  :color="unitsStore.windSpeedUnit === 'km/h' ? '#2a2e3b' : '#191d2c'" 
-                  @click="unitsStore.setWindSpeedUnit('km/h')">km/h</v-btn>
-              </v-col>
-              <v-divider vertical style="width: 1px;background-color: #4c4949;"></v-divider>
-              <v-col>
-                <v-btn block class="switch-btn"
-                  :color="unitsStore.windSpeedUnit === 'm/s' ? '#2a2e3b' : '#191d2c'" 
-                  @click="unitsStore.setWindSpeedUnit('m/s')">m/s</v-btn>
-              </v-col>
-            </v-row>
-          </v-card>
+        </v-card>
 
-          <!-- Pressure -->
+        <!-- Pressure -->
+        <v-row>
+          <v-text class="." style="padding: 20px; color:gray;">Pressure</v-text>
+        </v-row>
+        <v-card class="switch">
           <v-row>
-            <v-text class="." style="margin-left: 20px; padding: 20px; color:gray;">Pressure</v-text>
+            <v-col>
+              <v-btn block class="switch-btn" :color="unitsStore.pressureUnit === 'hPa' ? '#2a2e3b' : '#191d2c'"
+                @click="unitsStore.setPressureUnit('hPa')">hPa</v-btn>
+            </v-col>
+            <v-divider vertical style="width: 1px;background-color: #4c4949;"></v-divider>
+            <v-col>
+              <v-btn block class="switch-btn" :color="unitsStore.pressureUnit === 'mm' ? '#2a2e3b' : '#191d2c'"
+                @click="unitsStore.setPressureUnit('mm')">mm</v-btn>
+            </v-col>
           </v-row>
-          <v-card class="switch">
-            <v-row>
-              <v-col>
-                <v-btn block class="switch-btn"
-                  :color="unitsStore.pressureUnit === 'hPa' ? '#2a2e3b' : '#191d2c'" 
-                  @click="unitsStore.setPressureUnit('hPa')">hPa</v-btn>
-              </v-col>
-              <v-divider vertical style="width: 1px;background-color: #4c4949;"></v-divider>
-              <v-col>
-                <v-btn block class="switch-btn"
-                  :color="unitsStore.pressureUnit === 'mm' ? '#2a2e3b' : '#191d2c'" 
-                  @click="unitsStore.setPressureUnit('mm')">mm</v-btn>
-              </v-col>
-            </v-row>
-          </v-card>
+        </v-card>
 
-          <!-- Precipitation -->
+        <!-- Precipitation -->
+        <v-row>
+          <v-text class="." style="padding: 20px; color:gray;">Precipitation</v-text>
+        </v-row>
+        <v-card class="switch">
           <v-row>
-            <v-text class="." style="margin-left: 20px; padding: 20px; color:gray;">Precipitation</v-text>
+            <v-col>
+              <v-btn block class="switch-btn"
+                :color="unitsStore.precipitationUnit === 'millimeters' ? '#2a2e3b' : '#191d2c'"
+                @click="unitsStore.setPrecipitationUnit('millimeters')">Millimeters</v-btn>
+            </v-col>
+            <v-divider vertical style="width: 1px;background-color: #4c4949;"></v-divider>
+            <v-col>
+              <v-btn block class="switch-btn" :color="unitsStore.precipitationUnit === 'inches' ? '#2a2e3b' : '#191d2c'"
+                @click="unitsStore.setPrecipitationUnit('inches')">Inches</v-btn>
+            </v-col>
           </v-row>
-           <v-card class="switch">
-            <v-row>
-              <v-col>
-                <v-btn block class="switch-btn"
-                  :color="unitsStore.precipitationUnit === 'millimeters' ? '#2a2e3b' : '#191d2c'" 
-                  @click="unitsStore.setPrecipitationUnit('millimeters')">Millimeters</v-btn>
-              </v-col>
-              <v-divider vertical style="width: 1px;background-color: #4c4949;"></v-divider>
-              <v-col>
-                <v-btn block class="switch-btn"
-                  :color="unitsStore.precipitationUnit === 'inches' ? '#2a2e3b' : '#191d2c'" 
-                  @click="unitsStore.setPrecipitationUnit('inches')">Inches</v-btn>
-              </v-col>
-            </v-row>
-          </v-card>
-
-          <!-- Distance -->
-          <v-row>
-            <v-text class="." style="margin-left: 20px; padding: 20px; color:gray;">Distance</v-text>
-          </v-row>
-          <v-card class="switch">
-            <v-row>
-              <v-col>
-                <v-btn block class="switch-btn"
-                  :color="unitsStore.distanceUnit === 'kilometers' ? '#2a2e3b' : '#191d2c'" 
-                  @click="unitsStore.setDistanceUnit('kilometers')">Kilometers</v-btn>
-              </v-col>
-              <v-divider vertical style="width: 1px;background-color: #4c4949;"></v-divider>
-              <v-col>
-                <v-btn block class="switch-btn"
-                  :color="unitsStore.distanceUnit === 'miles' ? '#2a2e3b' : '#191d2c'" 
-                  @click="unitsStore.setDistanceUnit('miles')">Miles</v-btn>
-              </v-col>
-            </v-row>
-          </v-card>
+        </v-card>
       </v-card-text>
     </v-card>
 
     <!-- Notification Card -->
-    <v-card class="notification-card text-white mt-8" style="background-color:#2a2e3b; border-radius: 30px; padding: 20px;">
-      <v-card-title class="notification-header">Notifications</v-card-title>
-      <v-row align="center">
-        <v-col cols="11">
-          <p class="notification-text" style="margin-left: 20px; padding: 20px; color: gray;">Be aware of the weather</p>
+    <v-card class="notification-card text-white mt-5"
+      style="background-color:#2a2e3b; border-radius: 20px; padding: 8px;">
+      <v-card-title style="font-weight: bolder; font-size: 18px;">Notifications</v-card-title>
+      <v-row align="center" no-gutters>
+        <v-col cols="auto" class="d-flex align-center">
+          <span class="notification-text" style="color: gray; padding-left: 20px">Be aware of the weather</span>
         </v-col>
-        <v-col cols="1">
-          <v-switch 
-            v-model="isNotificationOn"
-            inset
-            dense
-            color="primary"
-            @change="toggleNotification" 
-          />
+        <v-spacer></v-spacer>
+        <v-col cols="auto" class="d-flex justify-end align-center pe-3">
+          <v-switch v-model="isNotificationOn" inset dense color="primary" @change="toggleNotification" />
         </v-col>
-      </v-row>  
+      </v-row>
     </v-card>
+
+
 
     <!-- Dialog for Notification Confirmation -->
     <v-dialog v-model="showDialog" max-width="400">
@@ -139,15 +111,24 @@
       </v-card>
     </v-dialog>
 
-     <!-- Logout Card -->
-     <v-card class="logout-card text-white mt-8" style="background-color:#2a2e3b; border-radius: 30px; padding: 20px;" @click="onLogout" :loading="formAction.formProcess" :disabled="formAction.formProcess">
-      <v-row>
-        <v-col cols="11"><v-card-title class="logout-header">Log out</v-card-title></v-col>
-        <v-col cols="1"><v-icon size="24" class="pt-5 pl-5">mdi-logout</v-icon></v-col>
+    <!-- Logout Card -->
+    <v-card class="logout-card text-white mt-5 " style="background-color:#2a2e3b; border-radius: 20px; padding: 20px;"
+      @click="onLogout" :loading="formAction.formProcess" :disabled="formAction.formProcess">
+      <v-row align="center" class="d-flex">
+        <v-col cols="auto" class="d-flex align-center">
+          <v-card-title class="logout-header" style="font-size: 18px; font-weight: bolder;">Logout</v-card-title>
+        </v-col>
+
+        <v-spacer></v-spacer>
+
+        <v-col cols="auto" class="d-flex justify-end pe-3">
+          <v-icon size="24">mdi-logout</v-icon>
+        </v-col>
       </v-row>
     </v-card>
-    
-    
+
+
+
   </v-container>
 </template>
 
@@ -199,17 +180,19 @@ const onLogout = async () => {
 <style scoped>
   .setting-container{
     margin-top: -30px;
-    margin-left: 10px;
+    margin-left: 0px;
   }
   .switch {
    background-color:#191d2c;
-   margin-left: 30px;
+   margin-left: 0px;
    border-radius: 15px;
    padding-right: 10px;
   }
   .switch-btn{
     border-radius: 10px; 
     margin: 5px;
+    font-size: 12.5px;
+    font-weight: bold;
   }
 
   .dialog-card {
