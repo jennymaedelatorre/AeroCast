@@ -57,46 +57,47 @@
 
         <!-- Modal (v-dialog) for Detailed Weather Info -->
         <v-dialog v-model="dialog" max-width="500px" persistent>
-  <v-card class="rounded-lg" elevation="10" style="background-color: #2a2e3b; color: white; border-radius: 20px;">
-    <v-card-title class="headline" style="font-size: 16px; font-weight: bold; padding:30px">
-      Weather Details for {{ selectedTime.hour }}
-    </v-card-title>
+          <v-card class="rounded-lg" elevation="10"
+            style="background-color: #2a2e3b; color: white; border-radius: 20px;">
+            <v-card-title class="headline" style="font-size: 16px; font-weight: bold; padding:30px">
+              Weather Details for {{ selectedTime.hour }}
+            </v-card-title>
 
-    <v-card-text>
-      <v-row>
+            <v-card-text>
+              <v-row>
 
-        <v-col cols="6">
-          <div class="weather-detail-item">
-            <strong>Temperature:</strong> {{ selectedTime.temperature }}&deg;{{ unitsStore.tempUnit }}
-          </div>
-          <div class="weather-detail-item">
-            <strong>Air Quality:</strong> {{ selectedTime.airQuality }}
-          </div>
-          <div class="weather-detail-item">
-            <strong>Wind Speed:</strong> {{ selectedTime.windSpeed }} km/h
-          </div>
-        </v-col>
+                <v-col cols="6">
+                  <div class="weather-detail-item">
+                    <strong>Temperature:</strong> {{ selectedTime.temperature }}&deg;{{ unitsStore.tempUnit }}
+                  </div>
+                  <div class="weather-detail-item">
+                    <strong>Air Quality:</strong> {{ selectedTime.airQuality }}
+                  </div>
+                  <div class="weather-detail-item">
+                    <strong>Wind Speed:</strong> {{ selectedTime.windSpeed }} km/h
+                  </div>
+                </v-col>
 
-       
-        <v-col cols="6">
-          <div class="weather-detail-item">
-            <strong>UV Index:</strong> {{ selectedTime.uvIndex }}
-          </div>
-          <div class="weather-detail-item">
-            <strong>Humidity:</strong> {{ selectedTime.humidity }}%
-          </div>
-        </v-col>
-      </v-row>
-    </v-card-text>
 
-    
-    <v-card-actions class="justify-center mb-5" style="">
-      <v-btn @click="dialog = false" style="min-width: 150px; background-color: #3f51b5; color:white;">
-        Close
-      </v-btn>
-    </v-card-actions>
-  </v-card>
-</v-dialog>
+                <v-col cols="6">
+                  <div class="weather-detail-item">
+                    <strong>UV Index:</strong> {{ selectedTime.uvIndex }}
+                  </div>
+                  <div class="weather-detail-item">
+                    <strong>Humidity:</strong> {{ selectedTime.humidity }}%
+                  </div>
+                </v-col>
+              </v-row>
+            </v-card-text>
+
+
+            <v-card-actions class="justify-center mb-5" style="">
+              <v-btn @click="dialog = false" style="min-width: 150px; background-color: #3f51b5; color:white;">
+                Close
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
 
 
 
@@ -346,7 +347,7 @@ import { useUnitsStore } from '@/stores/unit';
 const unitsStore = useUnitsStore();
 
 
-import cloudyIcon from '/imgs/4.png';
+import cloudyIcon from '/imgs/cloudy.png';
 import sunnyIcon from '/imgs/sun.png';
 import stormyIcon from '/imgs/storm.png';
 import rainyIcon from '/imgs/rain.png';

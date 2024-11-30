@@ -233,7 +233,6 @@ const onLogout = async () => {
 
 .logout-icon-link {
   color: white;
-  /* text-align: center; */
   text-decoration: none;
 }
  
