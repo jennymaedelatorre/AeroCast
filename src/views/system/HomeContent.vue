@@ -314,7 +314,7 @@
               <div class="sunset text-left">
                 <v-icon class="sun-icon">mdi-weather-sunset</v-icon>
                 <span class="sunset-label">Sunset</span>
-                <span class="sunset-time">5:45 PM</span>
+                <span class="sunset-time">{{ currentWeather.sunset }}</span>
               </div>
             </div>
           </v-card-text>
@@ -341,22 +341,20 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue';
-import { fetchWeather, fetchForecast } from '@/utils/useWeather'; // Adjust path to your utils
+import { fetchWeather, fetchForecast } from '@/utils/useWeather'; 
 import { useUnitsStore } from '@/stores/unit';
 
 const unitsStore = useUnitsStore();
 
-// State variables to hold the data
 const currentWeather = ref({});
 const hourlyForecast = ref([]);
-const sevenDayForecast = ref([]);  // We will store the 7-day forecast here
 const airQuality = ref({ status: 'Good', pm25: 15 });
 const activitySuggestions = ref([]);
 const currentQuote = ref('');
 const currentAuthor = ref('');
 let index = 0;
 
-// Create a reactive weather object
+
 const weather = ref({
   feelsLike: 0,
   uvIndex: 0,
@@ -375,7 +373,7 @@ const weather = ref({
 
 // City to get weather for
 const fiveDayForecast = ref([]);
-const city = 'Butuan City'; // Replace with your desired city
+const city = 'Butuan City';
 
 // Function to load weather data
 const loadWeatherData = async () => {
@@ -387,10 +385,10 @@ const loadWeatherData = async () => {
     // Fetch forecast data
     const forecast = await fetchForecast(city);
     hourlyForecast.value = forecast.hourlyForecast;
-    fiveDayForecast.value = forecast.fiveDayForecast; // Make sure this is being set
+    fiveDayForecast.value = forecast.fiveDayForecast; 
 
     console.log("Hourly Forecast:", hourlyForecast.value);
-    console.log("5-Day Forecast:", fiveDayForecast.value); // Check this in the console
+    console.log("5-Day Forecast:", fiveDayForecast.value); 
   } catch (error) {
     console.error('Error loading weather data:', error);
   }
@@ -424,10 +422,10 @@ const updateQuote = () => {
 };
 
 onMounted(() => {
-  loadWeatherData(); // Load weather and forecast data
+  loadWeatherData(); 
   loadActivitiesBasedOnWeather();
   updateQuote();
-  setInterval(updateQuote, 3000); // Update quote every 3 seconds
+  setInterval(updateQuote, 3000); 
 });
 
 onBeforeUnmount(() => {

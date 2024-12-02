@@ -10,27 +10,27 @@ async function fetchWeather(city) {
     const weatherCondition = weather[0].main.toLowerCase();
 
      // Format sunrise and sunset times
-     const sunriseTime = sys.sunrise ? new Date(sys.sunrise * 1000) : null; // Convert Unix timestamp to milliseconds if available
-     const sunsetTime = sys.sunset ? new Date(sys.sunset * 1000) : null;   // Convert Unix timestamp to milliseconds if available
+     const sunriseTime = sys.sunrise ? new Date(sys.sunrise * 1000) : null; 
+     const sunsetTime = sys.sunset ? new Date(sys.sunset * 1000) : null;   
  
-     const sunriseFormatted = sunriseTime ? formatTime(sunriseTime) : null;  // Format time if available
-     const sunsetFormatted = sunsetTime ? formatTime(sunsetTime) : null;    // Format time if available
+     const sunriseFormatted = sunriseTime ? formatTime(sunriseTime) : null; 
+     const sunsetFormatted = sunsetTime ? formatTime(sunsetTime) : null;   
  
 
     return {
       temperature: Math.round(main.temp),
-      feelsLike: Math.round(main.feels_like), // Add "feels like"
+      feelsLike: Math.round(main.feels_like), 
       condition: weather[0].description,
       description: getWeatherDescription(weatherCondition),
       icon: getCustomWeatherIcon(weatherCondition),
-      humidity: main.humidity, // Add humidity
-      pressure: main.pressure, // Add air pressure
-      windSpeed: wind.speed, // Add wind speed
-      visibility: visibility / 1000, // Visibility in kilometers
-      clouds: clouds.all, // Cloud percentage
-      precipitation: getPrecipitation(response.data), // Add precipitation info
-      sunset: sunsetFormatted,  // Sunset time
-      sunrise: sunriseFormatted, // Sunrise time
+      humidity: main.humidity, 
+      pressure: main.pressure, 
+      windSpeed: wind.speed, 
+      visibility: visibility / 1000, 
+      clouds: clouds.all, 
+      precipitation: getPrecipitation(response.data),
+      sunset: sunsetFormatted,  
+      sunrise: sunriseFormatted, 
     };
   } catch (error) {
     console.error(`Error fetching weather data for ${city}:`, error);
@@ -43,7 +43,7 @@ function formatTime(date) {
   const hours = date.getHours();
   const minutes = date.getMinutes();
   const ampm = hours >= 12 ? 'PM' : 'AM';
-  const formattedHours = hours % 12 || 12; // Convert to 12-hour format
+  const formattedHours = hours % 12 || 12; 
   const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
   return `${formattedHours}:${formattedMinutes} ${ampm}`;
 }
@@ -53,7 +53,7 @@ async function fetchForecast(city) {
   try {
     const response = await axios.get(`${forecastUrl}?q=${city}&appid=${apiKey}&units=metric`);
 
-    // Hourly forecast for the first day (24 hours)
+   
     const hourlyForecast = response.data.list.slice(0, 24).map((hour) => {
       const weatherCondition = hour.weather[0].main.toLowerCase();
       return {
@@ -64,7 +64,7 @@ async function fetchForecast(city) {
       };
     });
 
-    // 3-day forecast (one point per day)
+    // 3-day forecast
     const threeDayForecast = response.data.list.filter((entry, index) => index % 8 === 0).slice(0, 3).map((entry) => {
       const weatherCondition = entry.weather[0].main.toLowerCase();
       return {
@@ -75,6 +75,7 @@ async function fetchForecast(city) {
       };
     });
 
+    //five days weather forecast
     const fiveDayForecast = response.data.list.filter((entry, index) => index % 8 === 0).slice(0, 5).map((entry) => {
       const weatherCondition = entry.weather[0].main.toLowerCase();
       return {
@@ -127,7 +128,7 @@ function getCustomWeatherIcon(condition) {
   return iconMapping[condition] || "/imgs/default.png";
 }
 
-// Helper function to get precipitation (in mm)
+// function to get precipitation (in mm)
 function getPrecipitation(weatherData) {
   if (weatherData.rain && weatherData.rain["1h"]) {
     return weatherData.rain["1h"]; // Precipitation in the last hour
@@ -137,10 +138,10 @@ function getPrecipitation(weatherData) {
 
 // Format the sunset time
 function formatSunset(timestamp) {
-  const sunsetDate = new Date(timestamp * 1000); // Convert to milliseconds
+  const sunsetDate = new Date(timestamp * 1000); 
   const hours = sunsetDate.getHours().toString().padStart(2, '0');
   const minutes = sunsetDate.getMinutes().toString().padStart(2, '0');
-  return `${hours}:${minutes}`; // Return time in HH:mm format
+  return `${hours}:${minutes}`; 
 }
 
 export { fetchWeather, fetchForecast };
