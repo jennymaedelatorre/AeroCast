@@ -259,7 +259,7 @@ export default {
         { title: 'Zamboanga City' },
         { title: 'Mandaue City' },
       ],
-      selectedCity: null, // Initially no city selected
+      selectedCity: null, 
       cityWeather: {
         'Butuan City': { temperature: null, condition: '', icon: '', description: '' },
         'Baguio City': { temperature: null, condition: '', icon: '', description: '' },
@@ -267,8 +267,8 @@ export default {
         'Cebu City': { temperature: null, condition: '', icon: '', description: '' },
         'Cagayan De Oro City': { temperature: null, condition: '', icon: '', description: '' },
       },
-      hourlyForecast: [],  // This will hold hourly data
-      threeDayForecast: [],  // This will hold 3-day forecast data
+      hourlyForecast: [],  
+      threeDayForecast: [],  
     };
   },
 
@@ -388,7 +388,9 @@ export default {
   .city-card h2 {
     font-size: 20px !important;
   }
-
+  .add-city{
+    font-size: 8px !important;
+  }
   .see-more{
     margin-bottom: 5px;
   }
