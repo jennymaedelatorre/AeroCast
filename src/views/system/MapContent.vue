@@ -6,7 +6,7 @@
 
 <script setup>
 import { onMounted, ref } from 'vue';
-import { fetchWeather } from '@/utils/useWeather'; // Import your weather fetching function
+import { fetchWeather } from '@/utils/useWeather'; 
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
@@ -23,7 +23,6 @@ const map = ref(null);
 
 const updateMap = async () => {
   try {
-    // Initialize the map
     map.value = L.map('map', {
       center: [12.8797, 121.7740],
       zoom: 6,
@@ -37,7 +36,7 @@ const updateMap = async () => {
 
     // Fetch and add markers for each location
     for (const location of locations.value) {
-      const weather = await fetchWeather(location.name); // Fetch weather data for each location
+      const weather = await fetchWeather(location.name);
 
       const popupContent = `
   <div class="location-weather" style="text-align: center; padding:10px;">
@@ -62,7 +61,7 @@ const updateMap = async () => {
       marker.openPopup();
     }
 
-    // Ensure the map adjusts to the container size
+    
     setTimeout(() => {
       map.value.invalidateSize();
     }, 0);
@@ -73,7 +72,7 @@ const updateMap = async () => {
 };
 
 onMounted(() => {
-  updateMap(); // Load the map with weather data
+  updateMap(); 
 });
 </script>
 
