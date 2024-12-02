@@ -57,47 +57,46 @@
 
         <!-- Modal (v-dialog) for Detailed Weather Info -->
         <v-dialog v-model="dialog" max-width="500px" persistent>
-          <v-card class="rounded-lg" elevation="10"
-            style="background-color: #2a2e3b; color: white; border-radius: 20px;">
-            <v-card-title class="headline" style="font-size: 16px; font-weight: bold; padding:30px">
-              Weather Details for {{ selectedTime.hour }}
-            </v-card-title>
+  <v-card class="rounded-lg" elevation="10" style="background-color: #2a2e3b; color: white; border-radius: 20px;">
+    <v-card-title class="headline" style="font-size: 16px; font-weight: bold; padding:30px">
+      Weather Details for {{ selectedTime.hour }}
+    </v-card-title>
 
-            <v-card-text>
-              <v-row>
+    <v-card-text>
+      <v-row>
 
-                <v-col cols="6">
-                  <div class="weather-detail-item">
-                    <strong>Temperature:</strong> {{ selectedTime.temperature }}&deg;{{ unitsStore.tempUnit }}
-                  </div>
-                  <div class="weather-detail-item">
-                    <strong>Air Quality:</strong> {{ selectedTime.airQuality }}
-                  </div>
-                  <div class="weather-detail-item">
-                    <strong>Wind Speed:</strong> {{ selectedTime.windSpeed }} km/h
-                  </div>
-                </v-col>
+        <v-col cols="6">
+          <div class="weather-detail-item">
+            <strong>Temperature:</strong> {{ selectedTime.temperature }}&deg;{{ unitsStore.tempUnit }}
+          </div>
+          <div class="weather-detail-item">
+            <strong>Air Quality:</strong> {{ selectedTime.airQuality }}
+          </div>
+          <div class="weather-detail-item">
+            <strong>Wind Speed:</strong> {{ selectedTime.windSpeed }} km/h
+          </div>
+        </v-col>
 
+       
+        <v-col cols="6">
+          <div class="weather-detail-item">
+            <strong>UV Index:</strong> {{ selectedTime.uvIndex }}
+          </div>
+          <div class="weather-detail-item">
+            <strong>Humidity:</strong> {{ selectedTime.humidity }}%
+          </div>
+        </v-col>
+      </v-row>
+    </v-card-text>
 
-                <v-col cols="6">
-                  <div class="weather-detail-item">
-                    <strong>UV Index:</strong> {{ selectedTime.uvIndex }}
-                  </div>
-                  <div class="weather-detail-item">
-                    <strong>Humidity:</strong> {{ selectedTime.humidity }}%
-                  </div>
-                </v-col>
-              </v-row>
-            </v-card-text>
-
-
-            <v-card-actions class="justify-center mb-5" style="">
-              <v-btn @click="dialog = false" style="min-width: 150px; background-color: #3f51b5; color:white;">
-                Close
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
+    
+    <v-card-actions class="justify-center mb-5" style="">
+      <v-btn @click="dialog = false" style="min-width: 150px; background-color: #3f51b5; color:white;">
+        Close
+      </v-btn>
+    </v-card-actions>
+  </v-card>
+</v-dialog>
 
 
 
@@ -341,129 +340,15 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue';
-import { useUnitsStore } from '@/stores/unit';
+import axios from 'axios';
 
-// Use the Pinia store
-const unitsStore = useUnitsStore();
-
-
-import cloudyIcon from '/imgs/cloudy.png';
-import sunnyIcon from '/imgs/sun.png';
-import stormyIcon from '/imgs/storm.png';
-import rainyIcon from '/imgs/rain.png';
-
-// Define the hourly forecast data
-const hourlyForecast = ref([
-  { hour: '6:00 AM', image: cloudyIcon, temperature: 24, airQuality: 'Good', uvIndex: 5, windSpeed: 15, humidity: 60  },
-  { hour: '7:00 AM', image: cloudyIcon, temperature: 28, airQuality: 'Moderate', uvIndex: 4, windSpeed: 10, humidity: 65 },
-  { hour: '8:00 AM', image: sunnyIcon, temperature: 32, airQuality: 'Unhealthy', uvIndex: 2, windSpeed: 20, humidity: 80  },
-  { hour: '9:00 AM', image: rainyIcon, temperature: 15 },
-  { hour: '10:00 AM', image: rainyIcon, temperature: 18 },
-  { hour: '11:00 AM', image: sunnyIcon, temperature: 22 },
-  { hour: '12:00 NN', image: sunnyIcon, temperature: 21 },
-  { hour: '1:00 PM', image: sunnyIcon, temperature: 25 },
-  { hour: '2:00 PM', image: sunnyIcon, temperature: 19 },
-  { hour: '3:00 PM', image: sunnyIcon, temperature: 26 },
-  { hour: '4:00 PM', image: rainyIcon, temperature: 17 },
-  { hour: '5:00 PM', image: rainyIcon, temperature: 18 },
-  { hour: '6:00 PM', image: rainyIcon, temperature: 19 },
-  { hour: '7:00 PM', image: rainyIcon, temperature: 18 },
-  { hour: '8:00 PM', image: rainyIcon, temperature: 15 },
-
-]);
-
-// Define the weekly forecast data
-const weeklyForecast = ref([
-  { date: 'Monday', temperature: 24 },
-  { date: 'Tuesday', temperature: 18 },
-  { date: 'Wednesday', temperature: 22 },
-  { date: 'Thursday', temperature: 15 },
-  { date: 'Friday', temperature: 18 },
-  { date: 'Saturday', temperature: 22 },
-  { date: 'Sunday', temperature: 20 },
-]);
-
-// Function to get the weather icon based on temperature
-const getWeatherIcon = (temperature) => {
-  if (temperature >= 30) {
-    return sunnyIcon;
-  } else if (temperature >= 20) {
-    return sunnyIcon;
-  } else if (temperature >= 15) {
-    return stormyIcon;
-  } else {
-    return rainyIcon;
-  }
-};
-
-// For managing the modal dialog
-const dialog = ref(false) 
-const selectedTime = ref({})  
-
-// Function to handle when an hourly forecast item is clicked
-function showDetails(time) {
-  selectedTime.value = time  
-  dialog.value = true        
-}
-
-const onSeeMoreClick = () => {
-  alert("See More button clicked!");
-};
-
-// Define activity suggestions based on weather conditions
+// Reactive data
+const hourlyForecast = ref([]);
+const weeklyForecast = ref([]);
+const dialog = ref(false); // Modal dialog visibility
+const selectedTime = ref({}); // Selected hourly forecast details
+const airQuality = ref({ status: 'Good', pm25: 15 });
 const activitySuggestions = ref([]);
-const weatherCondition = 'sunny'; 
-
-const loadActivitiesBasedOnWeather = () => {
-  if (weatherCondition === 'sunny') {
-    activitySuggestions.value = [
-      { title: 'Go Hiking', description: 'Enjoy the scenic trails near you.', color: '#FFEB3B' },
-      { title: 'Outdoor Picnic', description: 'Have a relaxing day at the park.', color: '#FF9800' },
-      { title: 'Go for a Bike Ride', description: 'Enjoy the fresh air and exercise.', color: '#8BC34A' },
-    ];
-  } else if (weatherCondition === 'rainy') {
-    activitySuggestions.value = [
-      { title: 'Watch a Movie', description: 'Catch the latest films in theaters.', color: '#9E9E9E' },
-      { title: 'Read a Book', description: 'Get cozy with a good book.', color: '#5C6BC0' },
-      { title: 'Visit a Museum', description: 'Explore local history and art.', color: '#FF7043' },
-    ];
-  } else if (weatherCondition === 'snowy') {
-    activitySuggestions.value = [
-      { title: 'Go Skiing', description: 'Hit the slopes and enjoy the snow.', color: '#90CAF9' },
-      { title: 'Build a Snowman', description: 'Have fun building a snowman.', color: '#D1C4E9' },
-      { title: 'Enjoy Hot Cocoa', description: 'Warm up with a cup of hot cocoa.', color: '#FFCCBC' },
-    ];
-  } else {
-    activitySuggestions.value = [
-      { title: 'Explore Local Shops', description: 'Discover unique finds in your area.', color: '#C5E1A5' },
-      { title: 'Go to a Cafe', description: 'Relax at a local cafe.', color: '#FFF59D' },
-      { title: 'Visit an Art Gallery', description: 'Admire local art and creativity.', color: '#B0BEC5' },
-    ];
-  }
-};
-
-// hold air quality data
-const airQuality = ref({
-  status: 'Good',
-  pm25: 15,
-});
-
-// Function to generate a random PM2.5 value and update the air quality object
-const generateRandomAirQuality = () => {
-  const randomPm25 = Math.floor(Math.random() * 101);
-  airQuality.value.pm25 = randomPm25;
-
-  // Set air quality status based on PM2.5 value
-  if (randomPm25 <= 35) {
-    airQuality.value.status = 'Good';
-  } else if (randomPm25 <= 75) {
-    airQuality.value.status = 'Moderate';
-  } else {
-    airQuality.value.status = 'Unhealthy';
-  }
-};
-
-// Quotes logic
 const quotes = ref([
   { text: "There’s no such thing as bad weather, only inappropriate clothing.", author: "Sir Ranulph Fiennes" },
   { text: "The best thing about the weather is that it’s always changing.", author: "Unknown" },
@@ -482,37 +367,127 @@ const quotes = ref([
   { text: "A change in the weather is sufficient to recreate the world and ourselves.", author: "Marcel Proust" },
   { text: "To appreciate the beauty of a snowflake, it is necessary to stand out in the cold.", author: "Aristotle" }
 ]);
-
 const currentQuote = ref('');
 const currentAuthor = ref('');
-let index = 0;
+const unitsStore = {
+  tempUnit: 'C', // or 'F'
+  pressureUnit: 'hPa',
+  windSpeedUnit: 'km/h',
+  convertedTemp: 28, // dummy temp
+  convertedWindSpeed: 15, // dummy speed
+  convertedPressure: 1012, // dummy pressure
+};
 
-
+// Lifecycle intervals
 let airQualityInterval;
-let quoteInterval; 
+let quoteInterval;
 
+// Activity Suggestions Logic
+const weatherCondition = 'sunny';
+const loadActivitiesBasedOnWeather = () => {
+  if (weatherCondition === 'sunny') {
+    activitySuggestions.value = [
+      { title: 'Go Hiking', description: 'Enjoy the scenic trails near you.', color: '#FFEB3B' },
+      { title: 'Outdoor Picnic', description: 'Have a relaxing day at the park.', color: '#FF9800' },
+      { title: 'Go for a Bike Ride', description: 'Enjoy the fresh air and exercise.', color: '#8BC34A' },
+    ];
+  } else if (weatherCondition === 'rainy') {
+    activitySuggestions.value = [
+      { title: 'Watch a Movie', description: 'Catch the latest films in theaters.', color: '#9E9E9E' },
+      { title: 'Read a Book', description: 'Get cozy with a good book.', color: '#5C6BC0' },
+      { title: 'Visit a Museum', description: 'Explore local history and art.', color: '#FF7043' },
+    ];
+  }
+};
+
+// Quote Logic
+let index = 0;
 const updateQuote = () => {
   currentQuote.value = quotes.value[index].text;
   currentAuthor.value = quotes.value[index].author;
   index = (index + 1) % quotes.value.length;
 };
 
+// Air Quality Logic
+const generateRandomAirQuality = () => {
+  const randomPm25 = Math.floor(Math.random() * 101);
+  airQuality.value.pm25 = randomPm25;
 
+  if (randomPm25 <= 35) {
+    airQuality.value.status = 'Good';
+  } else if (randomPm25 <= 75) {
+    airQuality.value.status = 'Moderate';
+  } else {
+    airQuality.value.status = 'Unhealthy';
+  }
+};
+
+// API Fetch Logic
+const fetchHourlyForecast = async () => {
+  try {
+    const response = await axios.get('/api/hourly', { params: { city: 'Butuan City', unit: unitsStore.tempUnit } });
+    console.log('Raw Hourly Forecast Response:', response); // Log the raw response
+    console.log('Hourly Forecast Data:', response.data); // Log just the data portion
+
+    if (Array.isArray(response.data)) {
+      hourlyForecast.value = response.data.map((hour) => ({
+        hour: hour.time,
+        image: '/imgs/sun.png',
+        temperature: hour.temp,
+      }));
+      console.log('Formatted Hourly Forecast:', hourlyForecast.value);
+    } else {
+      console.error('Unexpected Hourly Forecast Response Format:', response.data);
+    }
+  } catch (error) {
+    console.error('Error Fetching Hourly Forecast:', error);
+  }
+};
+
+const fetchWeeklyForecast = async () => {
+  try {
+    const response = await axios.get('/api/weekly', { params: { city: 'Butuan City' } });
+    console.log('Raw Weekly Forecast Response:', response); // Log the raw response
+    console.log('Weekly Forecast Data:', response.data); // Log just the data portion
+
+    if (Array.isArray(response.data)) {
+      weeklyForecast.value = response.data.map((day) => ({
+        date: day.date,
+        temperature: day.temp,
+      }));
+      console.log('Formatted Weekly Forecast:', weeklyForecast.value);
+    } else {
+      console.error('Unexpected Weekly Forecast Response Format:', response.data);
+    }
+  } catch (error) {
+    console.error('Error Fetching Weekly Forecast:', error);
+  }
+};
+
+// Show Details Logic
+const showDetails = (time) => {
+  selectedTime.value = time;
+  dialog.value = true;
+};
+
+// Lifecycle Hooks
 onMounted(() => {
+  fetchHourlyForecast();
+  fetchWeeklyForecast();
   generateRandomAirQuality();
-  airQualityInterval = setInterval(generateRandomAirQuality, 5000);
   loadActivitiesBasedOnWeather();
   updateQuote();
+
+  airQualityInterval = setInterval(generateRandomAirQuality, 5000);
   quoteInterval = setInterval(updateQuote, 3000);
 });
-
 
 onBeforeUnmount(() => {
   clearInterval(airQualityInterval);
   clearInterval(quoteInterval);
 });
-
 </script>
+
 
 
 <style scoped>

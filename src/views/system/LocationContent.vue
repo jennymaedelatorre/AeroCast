@@ -5,6 +5,19 @@
         <v-text-field label="Search for Cities" filled dense rounded solo flat background-color="grey lighten-3"
           append-inner-icon="mdi-magnify" @click:append="onSearchClick"></v-text-field>
 
+        <v-menu>
+          <template v-slot:activator="{ props }">
+            <v-btn color="primary" class="add-city mb-5" v-bind="props">
+              Add city
+            </v-btn>
+          </template>
+          <v-list>
+            <v-list-item v-for="(item, index) in items" :key="index" :value="index">
+              <v-list-item-title>{{ item.title }}</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+
         <!-- City Card for Butuan City -->
         <v-card class="city-card text-white" :style="{
           ...activeCardStyle('Butuan City'),
@@ -26,6 +39,10 @@
             </h2>
             <v-btn color="primary" rounded @click="onSeeMoreClick('Butuan City')" class="see-more">
               <h4 style="font-size: 11px;">Set default</h4>
+            </v-btn>
+            <v-btn color="red" rounded @click="onDeleteCity('Butuan City')" class="delete-city"
+              style="margin-left: 10px;">
+              <h4 style="font-size: 10px;">Delete</h4>
             </v-btn>
           </v-col>
         </v-card>
@@ -53,6 +70,10 @@
             <v-btn color="primary" rounded @click="onSeeMoreClick('Baguio City')" class="see-more">
               <h4 style="font-size: 11px;">Set default</h4>
             </v-btn>
+            <v-btn color="red" rounded @click="onDeleteCity('Baguio City')" class="delete-city"
+              style="margin-left: 10px;">
+              <h4 style="font-size: 10px;">Delete</h4>
+            </v-btn>
           </v-col>
         </v-card>
 
@@ -77,6 +98,9 @@
             </h2>
             <v-btn color="primary" rounded @click="onSeeMoreClick('Manila')" class="see-more">
               <h4 style="font-size: 11px;">Set default</h4>
+            </v-btn>
+            <v-btn color="red" rounded @click="onDeleteCity('Manila')" class="delete-city" style="margin-left: 10px;">
+              <h4 style="font-size: 10px;">Delete</h4>
             </v-btn>
           </v-col>
         </v-card>
@@ -104,6 +128,10 @@
             <v-btn color="primary" rounded @click="onSeeMoreClick('Cebu City')" class="see-more">
               <h4 style="font-size: 11px;">Set default</h4>
             </v-btn>
+            <v-btn color="red" rounded @click="onDeleteCity('Cebu City')" class="delete-city"
+              style="margin-left: 10px;">
+              <h4 style="font-size: 10px;">Delete</h4>
+            </v-btn>
           </v-col>
         </v-card>
 
@@ -129,6 +157,10 @@
             </h2>
             <v-btn color="primary" rounded @click="onSeeMoreClick('Cagayan De Oro City')" class="see-more">
               <h4 style="font-size: 11px;">Set default</h4>
+            </v-btn>
+            <v-btn color="red" rounded @click="onDeleteCity('Cagayan De Oro City')" class="delete-city"
+              style="margin-left: 10px;">
+              <h4 style="font-size: 10px;">Delete</h4>
             </v-btn>
           </v-col>
         </v-card>
@@ -214,12 +246,19 @@
   </v-container>
 </template>
 
+
 <script>
-import axios from 'axios';
+import { fetchWeather, fetchForecast } from '@/utils/useWeather';
 
 export default {
   data() {
     return {
+      items: [
+        { title: 'Davao City' },
+        { title: 'Makati' },
+        { title: 'Zamboanga City' },
+        { title: 'Mandaue City' },
+      ],
       selectedCity: null, // Initially no city selected
       cityWeather: {
         'Butuan City': { temperature: null, condition: '', icon: '', description: '' },
@@ -228,168 +267,63 @@ export default {
         'Cebu City': { temperature: null, condition: '', icon: '', description: '' },
         'Cagayan De Oro City': { temperature: null, condition: '', icon: '', description: '' },
       },
-      hourlyForecast: [],
-      threeDayForecast: [],
-      apiKey: '54b6c73039702d61cc9c0e499bbe8cfc', // API Key
+      hourlyForecast: [],  // This will hold hourly data
+      threeDayForecast: [],  // This will hold 3-day forecast data
     };
+  },
+
+  mounted() {
+    Object.keys(this.cityWeather).forEach((city) => {
+      this.fetchWeather(city);
+      this.fetchForecast(city);
+    });
   },
 
   methods: {
     async fetchWeather(city) {
-      const baseUrl = 'https://api.openweathermap.org/data/2.5/weather';
-
       try {
-        const response = await axios.get(`${baseUrl}?q=${city}&appid=${this.apiKey}&units=metric`);
-
-        console.log("Weather condition for " + city + ":", response.data.weather[0].main);
-        
-
-        // Extract data from API response
-        const { main, weather, sys, dt } = response.data;
-
-        const currentTime = dt; // Current time (UNIX timestamp)
-        const sunrise = sys.sunrise; // Sunrise time (UNIX timestamp)
-        const sunset = sys.sunset; // Sunset time (UNIX timestamp)
-
-        // Determine if it's currently night
-        const isNight = currentTime < sunrise || currentTime > sunset;
-
-        // Update the weather data for the specific city
-        const weatherCondition = weather[0].main.toLowerCase();
-        this.cityWeather[city] = {
-          temperature: Math.round(main.temp), // Round to nearest integer
-          condition: weather[0].description,
-          description: this.getWeatherDescription(weatherCondition),
-          icon: this.getCustomWeatherIcon(weatherCondition, isNight), // Pass isNight flag to determine icon
-        };
-
+        const weatherData = await fetchWeather(city);
+        this.cityWeather[city] = weatherData;
         if (!this.selectedCity) {
-          // Set default selected city if none is set
           this.selectedCity = city;
         }
       } catch (error) {
-        console.error(`Error fetching weather data for ${city}:`, error);
+        console.error(`Error fetching weather for ${city}:`, error);
       }
     },
 
     async fetchForecast(city) {
-      const forecastUrl = 'https://api.openweathermap.org/data/2.5/forecast';
-
       try {
-        const response = await axios.get(`${forecastUrl}?q=${city}&appid=${this.apiKey}&units=metric`);
-
-        // Process hourly forecast (next 24 hours, each 3-hour interval)
-        this.hourlyForecast = response.data.list.slice(0, 24).map((hour) => {
-          const weatherCondition = hour.weather[0].main.toLowerCase();
-
-          // Check if it's night for the forecasted hour
-          const isNight = hour.dt < response.data.city.sunrise || hour.dt > response.data.city.sunset;
-
-          return {
-            hour: new Date(hour.dt * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            temperature: Math.round(hour.main.temp), // No decimals
-            image: this.getCustomWeatherIcon(weatherCondition, isNight), // Use isNight flag
-            description: hour.weather[0].description,
-            detailedDescription: this.getWeatherDescription(hour.weather[0].main),  // Add detailed description
-          };
-        });
-
-        // Process 3-day forecast (pick one forecast per day)
-        this.threeDayForecast = response.data.list.filter((entry, index) => index % 8 === 0).slice(0, 3).map((entry) => {
-          const weatherCondition = entry.weather[0].main.toLowerCase();
-
-          // Check if it's night for the forecasted day
-          const isNight = entry.dt < response.data.city.sunrise || entry.dt > response.data.city.sunset;
-
-          return {
-            date: new Date(entry.dt * 1000).toLocaleDateString(),
-            temperature: Math.round(entry.main.temp), // No decimals
-            description: entry.weather[0].description,
-            icon: this.getCustomWeatherIcon(weatherCondition, isNight),
-          };
-        });
+        const { hourlyForecast, threeDayForecast } = await fetchForecast(city);
+        this.hourlyForecast = hourlyForecast;
+        this.threeDayForecast = threeDayForecast;
       } catch (error) {
-        console.error(`Failed to fetch forecast for ${city}:`, error);
+        console.error(`Error fetching forecast for ${city}:`, error);
       }
     },
 
     onSeeMoreClick(city) {
-      this.selectedCity = city; // Update selected city
-      this.fetchWeather(city); // Fetch weather data for the selected city
-      this.fetchForecast(city); // Fetch forecast data for the selected city
-    },
-
-    getWeatherDescription(condition) {
-      // Map weather conditions to descriptive phrases
-      const descriptionMapping = {
-        clear: "A beautiful clear sky",
-        clouds: "Partly cloudy with some cloud cover",
-        rain: "Light rain expected, carry an umbrella",
-        drizzle: "Light drizzle, you may want an umbrella",
-        thunderstorm: "Thunderstorms, stay safe!",
-        snow: "Snowy weather, perfect for winter activities",
-        mist: "Mist or fog, low visibility",
-        haze: "Hazy weather, be careful on the roads",
-        smoke: "Smoky conditions, avoid outdoor activities",
-        dust: "Dusty, air quality may be poor",
-        fog: "Foggy weather, drive with caution",
-        sand: "Sandstorm, stay indoors if possible",
-        ash: "Volcanic ash, stay indoors and protect your lungs",
-        squall: "Strong gusts of wind, take care",
-        tornado: "Tornado warning, take shelter immediately",
-      };
-
-      console.log("Condition passed to description mapping:", condition); 
-
-      return descriptionMapping[condition] || "Weather condition is unclear";
-    },
-
-    getCustomWeatherIcon(condition, isNight) {
-      // Map your custom images to weather conditions
-      const iconMapping = {
-        day: {
-          clear: "/imgs/sun.png", // Clear sky (day)
-          clouds: "/imgs/cloudy.png", // Cloudy (day)
-          rain: "/imgs/rainy.png", // Rainy (day)
-          drizzle: "/imgs/rainy.png", // Drizzle (day)
-          thunderstorm: "/imgs/storm.png", // Thunderstorms (day)
-          snow: "/imgs/snow.png", // Snow (day)
-          mist: "/imgs/mist.png", // Mist or Fog (day)
-        },
-        night: {
-          clear: "/imgs/clear-night.png", // Clear sky (night)
-          clouds: "/imgs/cloudy-night.png", // Cloudy (night)
-          rain: "/imgs/rainy-night.png", // Rainy (night)
-          drizzle: "/imgs/rainy-night.png", // Drizzle (night)
-          thunderstorm: "/imgs/stormy-night.png", // Thunderstorms (night)
-          snow: "/imgs/night-snow.png", // Snow (night)
-          mist: "/imgs/night-mist.png", // Mist or Fog (night)
-        },
-      };
-
-      // Return the appropriate custom image based on time of day
-      return (isNight ? iconMapping.night[condition] : iconMapping.day[condition]) || "/imgs/default.png";
+      this.selectedCity = city;
+      this.fetchWeather(city);
+      this.fetchForecast(city);
     },
 
     activeCardStyle(city) {
       return {
-        backgroundColor: this.selectedCity === city ? 'transparent' : '#2a2e3b', // Transparent for selected, dark gray for unselected
+        backgroundColor: this.selectedCity === city ? 'transparent' : '#2a2e3b', 
       };
     }
-  },
-
-  mounted() {
-    // Fetch weather data and forecasts for all cities initially
-    Object.keys(this.cityWeather).forEach((city) => {
-      this.fetchWeather(city); // Fetch weather for each city
-      this.fetchForecast(city); // Fetch forecast for each city
-    });
   }
 };
 </script>
 
 
+
 <style scoped>
+.add-city {
+  padding: 10px 10%;
+  border-radius: 10px;
+}
 .weather {
   background-color: transparent;
   color: white;
@@ -455,8 +389,13 @@ export default {
     font-size: 20px !important;
   }
 
+  .see-more{
+    margin-bottom: 5px;
+  }
+
   .see-more h4 {
-    font-size: 9px !important;
+    padding: 3px 5px;
+    font-size: 8px !important;
   }
 
   .forecast img {
