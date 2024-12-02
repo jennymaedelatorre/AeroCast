@@ -2,24 +2,23 @@
   <v-container fluid class="text-white" style="margin-top: -20px;">
     <v-row>
       <v-col cols="12" lg="8">
-        <v-text-field label="Search for Cities" filled dense rounded solo flat background-color="grey lighten-3"
-          append-inner-icon="mdi-magnify" @click:append="onSearchClick"></v-text-field>
-
         <v-container>
           <v-card class="weather mx-auto mt-4" elevation="0" style="border: none;">
             <v-card-item title="Butuan City">
               <template v-slot:subtitle>
-                Chance of rain 0%
+                <span style="font-size: 13.5px;">
+                  {{ currentWeather.description }}
+                </span>
               </template>
             </v-card-item>
 
             <v-card-text class="mb-5">
               <v-row align="center" no-gutters>
                 <v-col class="text-h1 temp-font" cols="6" style="font-weight: bolder;">
-                  {{ unitsStore.convertedTemp }}&deg;{{ unitsStore.tempUnit }}
+                  {{ currentWeather.temperature }}&deg;{{ unitsStore.tempUnit }}
                 </v-col>
                 <v-col class="weather-icon text-right" cols="6">
-                  <img src="/imgs/sun.png" alt="Weather" width="150" />
+                  <img :src="currentWeather.icon" alt="Weather Icon" width="150" />
                 </v-col>
               </v-row>
             </v-card-text>
@@ -57,46 +56,47 @@
 
         <!-- Modal (v-dialog) for Detailed Weather Info -->
         <v-dialog v-model="dialog" max-width="500px" persistent>
-  <v-card class="rounded-lg" elevation="10" style="background-color: #2a2e3b; color: white; border-radius: 20px;">
-    <v-card-title class="headline" style="font-size: 16px; font-weight: bold; padding:30px">
-      Weather Details for {{ selectedTime.hour }}
-    </v-card-title>
+          <v-card class="rounded-lg" elevation="10"
+            style="background-color: #2a2e3b; color: white; border-radius: 20px;">
+            <v-card-title class="headline" style="font-size: 16px; font-weight: bold; padding:30px">
+              Weather Details for {{ selectedTime.hour }}
+            </v-card-title>
 
-    <v-card-text>
-      <v-row>
+            <v-card-text>
+              <v-row>
 
-        <v-col cols="6">
-          <div class="weather-detail-item">
-            <strong>Temperature:</strong> {{ selectedTime.temperature }}&deg;{{ unitsStore.tempUnit }}
-          </div>
-          <div class="weather-detail-item">
-            <strong>Air Quality:</strong> {{ selectedTime.airQuality }}
-          </div>
-          <div class="weather-detail-item">
-            <strong>Wind Speed:</strong> {{ selectedTime.windSpeed }} km/h
-          </div>
-        </v-col>
+                <v-col cols="6">
+                  <div class="weather-detail-item">
+                    <strong>Temperature:</strong> {{ selectedTime.temperature }}&deg;{{ unitsStore.tempUnit }}
+                  </div>
+                  <div class="weather-detail-item">
+                    <strong>Air Quality:</strong> {{ selectedTime.airQuality }}
+                  </div>
+                  <div class="weather-detail-item">
+                    <strong>Wind Speed:</strong> {{ selectedTime.windSpeed }} km/h
+                  </div>
+                </v-col>
 
-       
-        <v-col cols="6">
-          <div class="weather-detail-item">
-            <strong>UV Index:</strong> {{ selectedTime.uvIndex }}
-          </div>
-          <div class="weather-detail-item">
-            <strong>Humidity:</strong> {{ selectedTime.humidity }}%
-          </div>
-        </v-col>
-      </v-row>
-    </v-card-text>
 
-    
-    <v-card-actions class="justify-center mb-5" style="">
-      <v-btn @click="dialog = false" style="min-width: 150px; background-color: #3f51b5; color:white;">
-        Close
-      </v-btn>
-    </v-card-actions>
-  </v-card>
-</v-dialog>
+                <v-col cols="6">
+                  <div class="weather-detail-item">
+                    <strong>UV Index:</strong> {{ selectedTime.uvIndex }}
+                  </div>
+                  <div class="weather-detail-item">
+                    <strong>Humidity:</strong> {{ selectedTime.humidity }}%
+                  </div>
+                </v-col>
+              </v-row>
+            </v-card-text>
+
+
+            <v-card-actions class="justify-center mb-5" style="">
+              <v-btn @click="dialog = false" style="min-width: 150px; background-color: #3f51b5; color:white;">
+                Close
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
 
 
 
@@ -134,15 +134,15 @@
                       <v-icon class="mr-1" size="28">mdi-thermometer</v-icon>
                       <span style="color: gray; font-size: 15px;">Feels like</span>
                     </div>
-                    <strong class="temperature-value" style="font-size: 20px;">30&deg;</strong>
+                    <strong class="temperature-value" style="font-size: 20px;">{{ currentWeather.feelsLike }}°C</strong>
                   </div>
 
                   <div class="d-flex flex-column mt-4">
                     <div class="d-flex align-center">
-                      <v-icon class="mr-1" size="28">mdi-weather-sunny</v-icon>
-                      <span style="color: gray; font-size: 15px;">UV Index</span>
+                      <v-icon class="mr-1" size="28">mdi-cloud</v-icon>
+                      <span style="color: gray; font-size: 15px;">Cloud Coverage</span>
                     </div>
-                    <strong class="temperature-value" style="font-size: 20px;">3</strong>
+                    <strong class="temperature-value" style="font-size: 20px;">{{ currentWeather.clouds }}</strong>
                   </div>
 
                   <div class="d-flex flex-column mt-4">
@@ -150,7 +150,7 @@
                       <v-icon class="mr-2" size="28">mdi-water-percent</v-icon>
                       <span style="color: gray; font-size: 15px;">Humidity</span>
                     </div>
-                    <strong class="temperature-value" style="font-size: 20px;">60%</strong>
+                    <strong class="temperature-value" style="font-size: 20px;">{{ currentWeather.humidity }}%</strong>
                   </div>
 
                   <div class="d-flex flex-column mt-4">
@@ -158,18 +158,18 @@
                       <v-icon class="mr-2" size="28">mdi-speedometer</v-icon>
                       <span style="color: gray; font-size: 15px;">Air Pressure</span>
                     </div>
-                    <strong class="temperature-value" style="font-size: 20px;">{{ unitsStore.convertedPressure }} {{
-                      unitsStore.pressureUnit }}</strong>
+                    <strong class="temperature-value" style="font-size: 20px;">{{ currentWeather.pressure }}
+                      hPa</strong>
                   </div>
                 </v-col>
 
                 <v-col cols="5">
                   <div class="d-flex flex-column">
                     <div class="d-flex align-center">
-                      <v-icon class="mr-1" size="28">mdi-water-percent</v-icon>
-                      <span style="color: gray; font-size: 15px;">Chance of Rain</span>
+                      <v-icon class="mr-1" size="28">mdi-weather-sunny</v-icon>
+                      <span style="color: gray; font-size: 15px;">Condition</span>
                     </div>
-                    <strong class="temperature-value" style="font-size: 20px;">0%</strong>
+                    <strong class="temperature-value" style="font-size: 20px;">{{ currentWeather.condition }}</strong>
                   </div>
 
                   <div class="d-flex flex-column mt-4">
@@ -177,8 +177,8 @@
                       <v-icon class="mr-2" size="28">mdi-weather-windy</v-icon>
                       <span style="color: gray; font-size: 15px;">Wind</span>
                     </div>
-                    <strong class="temperature-value" style="font-size: 20px;"> {{ unitsStore.convertedWindSpeed }}
-                      <i>{{ unitsStore.windSpeedUnit }}</i></strong>
+                    <strong class="temperature-value" style="font-size: 20px;">{{ currentWeather.windSpeed }}
+                      m/s</strong>
                   </div>
 
                   <div class="d-flex flex-column mt-4">
@@ -186,7 +186,8 @@
                       <v-icon class="mr-2" size="28">mdi-eye</v-icon>
                       <span style="color: gray; font-size: 15px;">Visibility</span>
                     </div>
-                    <strong class="temperature-value" style="font-size: 20px;">7 mi</strong>
+                    <strong class="temperature-value" style="font-size: 20px;">{{ currentWeather.visibility }}
+                      km</strong>
                   </div>
 
                   <div class="d-flex flex-column mt-4">
@@ -194,7 +195,7 @@
                       <v-icon class="mr-2" size="28">mdi-weather-sunset</v-icon>
                       <span style="color: gray; font-size: 15px;">Sunset</span>
                     </div>
-                    <strong class="temperature-value" style="font-size: 20px;">20:58</strong>
+                    <strong class="temperature-value" style="font-size: 20px;">{{ currentWeather.sunset }}</strong>
                   </div>
                 </v-col>
               </v-row>
@@ -245,27 +246,27 @@
             <v-icon left class="mr-2">
               mdi-calendar
             </v-icon>
-            7-Day Weather Forecast
+            5-Day Weather Forecast
           </v-card-title>
           <v-card-text>
             <v-list-item-group>
-              <v-list-item v-for="(day, index) in weeklyForecast" :key="index">
+              <v-list-item v-for="(day, index) in fiveDayForecast" :key="index">
                 <v-list-item-content>
                   <v-list-item-title>
-                    <div class="d-flex  justify-space-between align-center">
-                      <span style="color:gray">{{ day.date }}</span>
-                      <img :src="getWeatherIcon(day.temperature)" alt="Weather Icon"
-                        style="width: 40px; height: 40px; margin-right: 8px;" />
-                      <span class="ml" style="font-size: 20px;"><strong>{{ day.temperature }}°{{ unitsStore.tempUnit
-                          }}</strong></span>
+                    <div class="d-flex justify-space-between align-center">
+                      <span style="color: gray">{{ day.date }}</span>
+                      <img :src="day.icon" alt="Weather Icon" style="width: 40px; height: 40px; margin-right: 8px;" />
+                      <span class="ml" style="font-size: 20px;"><strong>{{ day.temperature }}°C</strong></span>
                     </div>
                   </v-list-item-title>
                 </v-list-item-content>
-                <v-divider v-if="index < weeklyForecast.length - 1" style="margin: 20px 0;"></v-divider>
+                <v-divider v-if="index < fiveDayForecast.length - 1" style="margin: 20px 0;"></v-divider>
               </v-list-item>
             </v-list-item-group>
           </v-card-text>
         </v-card>
+
+
 
         <v-card class="wax-cresent text-white" elevation="0" style="background-color: #2a2e3b; padding: 20px;">
           <v-card-title style="font-size: 16px; margin: 10px 0 15px 30px; color: gray;">
@@ -340,151 +341,97 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue';
-import axios from 'axios';
+import { fetchWeather, fetchForecast } from '@/utils/useWeather'; // Adjust path to your utils
+import { useUnitsStore } from '@/stores/unit';
 
-// Reactive data
+const unitsStore = useUnitsStore();
+
+// State variables to hold the data
+const currentWeather = ref({});
 const hourlyForecast = ref([]);
-const weeklyForecast = ref([]);
-const dialog = ref(false); // Modal dialog visibility
-const selectedTime = ref({}); // Selected hourly forecast details
+const sevenDayForecast = ref([]);  // We will store the 7-day forecast here
 const airQuality = ref({ status: 'Good', pm25: 15 });
 const activitySuggestions = ref([]);
-const quotes = ref([
-  { text: "There’s no such thing as bad weather, only inappropriate clothing.", author: "Sir Ranulph Fiennes" },
-  { text: "The best thing about the weather is that it’s always changing.", author: "Unknown" },
-  { text: "The sun is a daily reminder that we too can rise again from the darkness.", author: "Unknown" },
-  { text: "A little rain each day will quench the drought.", author: "Anonymous" },
-  { text: "Sunshine is delicious, rain is refreshing, wind braces us up, snow is exhilarating; there’s really no such thing as bad weather, only different kinds of good weather.", author: "John Ruskin" },
-  { text: "Every storm runs out of rain.", author: "Maya Angelou" },
-  { text: "In the midst of winter, I found there was, within me, an invincible summer.", author: "Albert Camus" },
-  { text: "The sky is the daily bread of the eyes.", author: "Ralph Waldo Emerson" },
-  { text: "Weather is a great metaphor for life—sometimes it's good, sometimes it's bad, and there's nothing much you can do about it but carry an umbrella.", author: "Terry Pratchett" },
-  { text: "If you don't like the weather in New England, just wait a few minutes.", author: "Mark Twain" },
-  { text: "The sun will shine on those who stand before it shines on those who kneel under them.", author: "A. M. McCaffrey" },
-  { text: "The best time to plant a tree was twenty years ago. The second best time is now.", author: "Chinese Proverb" },
-  { text: "In the middle of difficulty lies opportunity.", author: "Albert Einstein" },
-  { text: "Rain is not a period of despair. It is a symbol of life.", author: "Unknown" },
-  { text: "A change in the weather is sufficient to recreate the world and ourselves.", author: "Marcel Proust" },
-  { text: "To appreciate the beauty of a snowflake, it is necessary to stand out in the cold.", author: "Aristotle" }
-]);
 const currentQuote = ref('');
 const currentAuthor = ref('');
-const unitsStore = {
-  tempUnit: 'C', // or 'F'
-  pressureUnit: 'hPa',
-  windSpeedUnit: 'km/h',
-  convertedTemp: 28, // dummy temp
-  convertedWindSpeed: 15, // dummy speed
-  convertedPressure: 1012, // dummy pressure
+let index = 0;
+
+// Create a reactive weather object
+const weather = ref({
+  feelsLike: 0,
+  uvIndex: 0,
+  humidity: 0,
+  pressure: 0,
+  precipitation: 0,
+  windSpeed: 0,
+  visibility: 0,
+  clouds: 0,
+  sunset: '',
+  condition: '',
+  icon: '',
+});
+
+
+
+// City to get weather for
+const fiveDayForecast = ref([]);
+const city = 'Butuan City'; // Replace with your desired city
+
+// Function to load weather data
+const loadWeatherData = async () => {
+  try {
+    // Fetch current weather
+    const weather = await fetchWeather(city);
+    currentWeather.value = weather;
+
+    // Fetch forecast data
+    const forecast = await fetchForecast(city);
+    hourlyForecast.value = forecast.hourlyForecast;
+    fiveDayForecast.value = forecast.fiveDayForecast; // Make sure this is being set
+
+    console.log("Hourly Forecast:", hourlyForecast.value);
+    console.log("5-Day Forecast:", fiveDayForecast.value); // Check this in the console
+  } catch (error) {
+    console.error('Error loading weather data:', error);
+  }
 };
 
-// Lifecycle intervals
-let airQualityInterval;
-let quoteInterval;
 
-// Activity Suggestions Logic
-const weatherCondition = 'sunny';
+// Function to load activities based on weather
 const loadActivitiesBasedOnWeather = () => {
-  if (weatherCondition === 'sunny') {
+  if (hourlyForecast.value.length && hourlyForecast.value[0].image === '/imgs/sun.png') {
     activitySuggestions.value = [
       { title: 'Go Hiking', description: 'Enjoy the scenic trails near you.', color: '#FFEB3B' },
       { title: 'Outdoor Picnic', description: 'Have a relaxing day at the park.', color: '#FF9800' },
-      { title: 'Go for a Bike Ride', description: 'Enjoy the fresh air and exercise.', color: '#8BC34A' },
     ];
-  } else if (weatherCondition === 'rainy') {
+  } else {
     activitySuggestions.value = [
-      { title: 'Watch a Movie', description: 'Catch the latest films in theaters.', color: '#9E9E9E' },
       { title: 'Read a Book', description: 'Get cozy with a good book.', color: '#5C6BC0' },
-      { title: 'Visit a Museum', description: 'Explore local history and art.', color: '#FF7043' },
     ];
   }
 };
 
-// Quote Logic
-let index = 0;
+// Quotes logic
+const quotes = ref([
+  { text: "There’s no such thing as bad weather, only inappropriate clothing.", author: "Sir Ranulph Fiennes" },
+  { text: "The sun is a daily reminder that we too can rise again from the darkness.", author: "Unknown" },
+]);
+
 const updateQuote = () => {
   currentQuote.value = quotes.value[index].text;
   currentAuthor.value = quotes.value[index].author;
   index = (index + 1) % quotes.value.length;
 };
 
-// Air Quality Logic
-const generateRandomAirQuality = () => {
-  const randomPm25 = Math.floor(Math.random() * 101);
-  airQuality.value.pm25 = randomPm25;
-
-  if (randomPm25 <= 35) {
-    airQuality.value.status = 'Good';
-  } else if (randomPm25 <= 75) {
-    airQuality.value.status = 'Moderate';
-  } else {
-    airQuality.value.status = 'Unhealthy';
-  }
-};
-
-// API Fetch Logic
-const fetchHourlyForecast = async () => {
-  try {
-    const response = await axios.get('/api/hourly', { params: { city: 'Butuan City', unit: unitsStore.tempUnit } });
-    console.log('Raw Hourly Forecast Response:', response); // Log the raw response
-    console.log('Hourly Forecast Data:', response.data); // Log just the data portion
-
-    if (Array.isArray(response.data)) {
-      hourlyForecast.value = response.data.map((hour) => ({
-        hour: hour.time,
-        image: '/imgs/sun.png',
-        temperature: hour.temp,
-      }));
-      console.log('Formatted Hourly Forecast:', hourlyForecast.value);
-    } else {
-      console.error('Unexpected Hourly Forecast Response Format:', response.data);
-    }
-  } catch (error) {
-    console.error('Error Fetching Hourly Forecast:', error);
-  }
-};
-
-const fetchWeeklyForecast = async () => {
-  try {
-    const response = await axios.get('/api/weekly', { params: { city: 'Butuan City' } });
-    console.log('Raw Weekly Forecast Response:', response); // Log the raw response
-    console.log('Weekly Forecast Data:', response.data); // Log just the data portion
-
-    if (Array.isArray(response.data)) {
-      weeklyForecast.value = response.data.map((day) => ({
-        date: day.date,
-        temperature: day.temp,
-      }));
-      console.log('Formatted Weekly Forecast:', weeklyForecast.value);
-    } else {
-      console.error('Unexpected Weekly Forecast Response Format:', response.data);
-    }
-  } catch (error) {
-    console.error('Error Fetching Weekly Forecast:', error);
-  }
-};
-
-// Show Details Logic
-const showDetails = (time) => {
-  selectedTime.value = time;
-  dialog.value = true;
-};
-
-// Lifecycle Hooks
 onMounted(() => {
-  fetchHourlyForecast();
-  fetchWeeklyForecast();
-  generateRandomAirQuality();
+  loadWeatherData(); // Load weather and forecast data
   loadActivitiesBasedOnWeather();
   updateQuote();
-
-  airQualityInterval = setInterval(generateRandomAirQuality, 5000);
-  quoteInterval = setInterval(updateQuote, 3000);
+  setInterval(updateQuote, 3000); // Update quote every 3 seconds
 });
 
 onBeforeUnmount(() => {
-  clearInterval(airQualityInterval);
-  clearInterval(quoteInterval);
+  clearInterval(updateQuote);
 });
 </script>
 

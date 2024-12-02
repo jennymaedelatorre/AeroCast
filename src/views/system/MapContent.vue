@@ -6,53 +6,76 @@
 
 <script setup>
 import { onMounted, ref } from 'vue';
+import { fetchWeather } from '@/utils/useWeather'; // Import your weather fetching function
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
+// Define the list of locations
 const locations = ref([
-  { name: 'Manila', temperature: 32, coords: [14.5995, 120.9842], icon: '/imgs/sun.png' },
-  { name: 'Butuan City', temperature: 25, coords: [8.9475, 125.5406], icon: '/imgs/sun.png' },
-  { name: 'Cebu City', temperature: 26, coords: [10.3157, 123.8854], icon: '/imgs/sun.png' },
-  { name: 'Cagayan de Oro City', temperature: 15, coords: [8.4542, 124.6319], icon: '/imgs/storm.png' },
-  { name: 'Baguio City', temperature: 18, coords: [16.4023, 120.5969], icon: '/imgs/rain.png' },
+  { name: 'Manila', coords: [14.5995, 120.9842] },
+  { name: 'Butuan City', coords: [8.9475, 125.5406] },
+  { name: 'Cebu City', coords: [10.3157, 123.8854] },
+  { name: 'Cagayan de Oro City', coords: [8.4542, 124.6319] },
+  { name: 'Baguio City', coords: [16.4023, 120.5969] },
 ]);
 
 const map = ref(null);
 
+const updateMap = async () => {
+  try {
+    // Initialize the map
+    map.value = L.map('map', {
+      center: [12.8797, 121.7740],
+      zoom: 6,
+      zoomControl: true,
+    });
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap',
+    }).addTo(map.value);
+
+    // Fetch and add markers for each location
+    for (const location of locations.value) {
+      const weather = await fetchWeather(location.name); // Fetch weather data for each location
+
+      const popupContent = `
+  <div class="location-weather" style="text-align: center; padding:10px;">
+    <img src="${weather.icon}" alt="${location.name}" style="width: 50px; height: 50px;"/>
+    <h5 style="font-size:15px; margin-bottom:10px;"><b>${location.name}</b></h5>
+    <span style="font-size:18px;"><strong>${weather.temperature}°C</strong></span>
+    <p>Feels like: ${weather.feelsLike}°C</p>
+    <p>Humidity: ${weather.humidity}%</p>
+    <p>Pressure: ${weather.pressure} hPa</p>
+    <p>Wind Speed: ${weather.windSpeed} m/s</p>
+    <p>Visibility: ${weather.visibility} km</p>
+    <p>Cloud Coverage: ${weather.clouds}%</p>
+    <p>Precipitation: ${weather.precipitation} mm</p>
+    <p>Sunset: ${weather.sunset}</p>
+  </div>
+`;
+
+
+      const marker = L.marker(location.coords).addTo(map.value).bindPopup(popupContent);
+
+      // Optionally open the popup by default (if desired)
+      marker.openPopup();
+    }
+
+    // Ensure the map adjusts to the container size
+    setTimeout(() => {
+      map.value.invalidateSize();
+    }, 0);
+
+  } catch (error) {
+    console.error('Error loading map or weather data:', error);
+  }
+};
+
 onMounted(() => {
-  map.value = L.map('map', {
-    center: [12.8797, 121.7740],
-    zoom: 6,
-    zoomControl: true,
-  });
-
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '© OpenStreetMap',
-  }).addTo(map.value);
-
-  locations.value.forEach(location => {
-    const popupContent = `
-      <div class="location-weather" style="text-align: center; padding:10px;">
-        <img src="${location.icon}" alt="${location.name}" style="width: 50px; height: 50px;"/>
-        <h5 style="font-size:15px; margin-bottom:10px;"><b>${location.name}</b></h5>
-        <span style="font-size:18px;"><strong>${location.temperature}°C</strong></span>
-      </div>
-    `;
-
-    const marker = L.marker(location.coords).addTo(map.value).bindPopup(popupContent);
-
-    // Optionally open the popup by default
-    marker.openPopup();
-  });
-
-  // Ensure the map adjusts to the container size
-  setTimeout(() => {
-    map.value.invalidateSize();
-  }, 0);
+  updateMap(); // Load the map with weather data
 });
 </script>
-
 
 <style scoped>
 .map-content {
@@ -64,27 +87,8 @@ onMounted(() => {
 .map {
   height: 100vh;
 }
-.location-card {
-  background: rgba(255, 255, 255, 0.8);
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-  padding: 10px;
-  width: 100px;
+.location-weather {
   text-align: center;
-  transition: transform 0.2s;
-}
-
-.location-card:hover {
-  transform: scale(1.05);
-}
-
-.location-icon {
-  display: block;
-  width: 30px;
-  height: 30px;
-}
-
-.location-info {
-  font-size: 14px;
+  padding: 10px;
 }
 </style>
