@@ -2,20 +2,35 @@ import axios from 'axios';
 
 const apiKey = '54b6c73039702d61cc9c0e499bbe8cfc';
 
+// Function to fetch air quality data
+async function fetchAirQuality(lat, lon) {
+  const airQualityUrl = 'https://api.openweathermap.org/data/2.5/air_pollution';
+  try {
+    const response = await axios.get(`${airQualityUrl}?lat=${lat}&lon=${lon}&appid=${apiKey}`);
+    const airQualityData = response.data.list[0]; // Typically, the air quality data is inside the 'list' array
+    return airQualityData;
+  } catch (error) {
+    console.error('Error fetching air quality data:', error);
+    throw error;
+  }
+}
+
+// Function to fetch weather data
 async function fetchWeather(city) {
   const baseUrl = 'https://api.openweathermap.org/data/2.5/weather';
   try {
     const response = await axios.get(`${baseUrl}?q=${city}&appid=${apiKey}&units=metric`);
-    const { main, weather, wind, visibility, clouds, sys } = response.data;
+    const { main, weather, wind, visibility, clouds, sys, coord } = response.data;
     const weatherCondition = weather[0].main.toLowerCase();
 
-     // Format sunrise and sunset times
-     const sunriseTime = sys.sunrise ? new Date(sys.sunrise * 1000) : null; 
-     const sunsetTime = sys.sunset ? new Date(sys.sunset * 1000) : null;   
- 
-     const sunriseFormatted = sunriseTime ? formatTime(sunriseTime) : null; 
-     const sunsetFormatted = sunsetTime ? formatTime(sunsetTime) : null;   
- 
+    // Format sunrise and sunset times
+    const sunriseTime = sys.sunrise ? new Date(sys.sunrise * 1000) : null; 
+    const sunsetTime = sys.sunset ? new Date(sys.sunset * 1000) : null;   
+    const sunriseFormatted = sunriseTime ? formatTime(sunriseTime) : null; 
+    const sunsetFormatted = sunsetTime ? formatTime(sunsetTime) : null;   
+
+    // Fetch air quality based on latitude and longitude
+    const airQuality = await fetchAirQuality(coord.lat, coord.lon);
 
     return {
       temperature: Math.round(main.temp),
@@ -31,6 +46,8 @@ async function fetchWeather(city) {
       precipitation: getPrecipitation(response.data),
       sunset: sunsetFormatted,  
       sunrise: sunriseFormatted, 
+      airQuality: airQuality.main.aqi, // Air quality index (AQI)
+      pm25: airQuality.components.pm2_5, // PM2.5 levels
     };
   } catch (error) {
     console.error(`Error fetching weather data for ${city}:`, error);
@@ -38,22 +55,11 @@ async function fetchWeather(city) {
   }
 }
 
-
-function formatTime(date) {
-  const hours = date.getHours();
-  const minutes = date.getMinutes();
-  const ampm = hours >= 12 ? 'PM' : 'AM';
-  const formattedHours = hours % 12 || 12; 
-  const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
-  return `${formattedHours}:${formattedMinutes} ${ampm}`;
-}
-
+// Fetch the forecast (unchanged)
 async function fetchForecast(city) {
   const forecastUrl = 'https://api.openweathermap.org/data/2.5/forecast';
   try {
     const response = await axios.get(`${forecastUrl}?q=${city}&appid=${apiKey}&units=metric`);
-
-   
     const hourlyForecast = response.data.list.slice(0, 24).map((hour) => {
       const weatherCondition = hour.weather[0].main.toLowerCase();
       return {
@@ -93,6 +99,16 @@ async function fetchForecast(city) {
   }
 }
 
+// Helper functions (unchanged)
+function formatTime(date) {
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  const formattedHours = hours % 12 || 12; 
+  const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+  return `${formattedHours}:${formattedMinutes} ${ampm}`;
+}
+
 function getWeatherDescription(condition) {
   const descriptionMapping = {
     clear: "A beautiful clear sky",
@@ -115,33 +131,47 @@ function getWeatherDescription(condition) {
 }
 
 function getCustomWeatherIcon(condition) {
+  // Normalize the condition to lowercase for consistency
+  const normalizedCondition = condition.toLowerCase();
+
+  // Mapping of weather conditions to their corresponding icons
   const iconMapping = {
-    clear: "/imgs/sun.png",
-    clouds: "/imgs/cloudy.png",
-    rain: "/imgs/rain.png",
-    drizzle: "/imgs/rain.png",
-    thunderstorm: "/imgs/storm.png",
-    snow: "/imgs/snow.png",
-    mist: "/imgs/mist.png",
+    sunny: "/imgs/sun.png", 
+    clear: "/imgs/sun.png",  
+    clouds: "/imgs/overcast-cloud.png",  
+    partlycloudy: "/imgs/overcast-cloud.png",  
+    cloud: "/imgs/overcast-cloud.png", 
+    rain: "/imgs/rainy-cloud.png",  
+    drizzle: "/imgs/rain.png",  
+    thunderstorms: "/imgs/storm.png", 
+    snow: "/imgs/snow.png",  
+    mist: "/imgs/mist.png", 
   };
 
-  return iconMapping[condition] || "/imgs/default.png";
+  // Check for all possible weather conditions and return the appropriate icon
+  if (normalizedCondition.includes("clear") || normalizedCondition.includes("sunny")) {
+    return iconMapping["sunny"];  
+  } else if (normalizedCondition.includes("cloud") || normalizedCondition.includes("partly cloudy")) {
+    return iconMapping["clouds"]; 
+  } else if (normalizedCondition.includes("rain") || normalizedCondition.includes("drizzle")) {
+    return iconMapping["rain"];  
+  } else if (normalizedCondition.includes("storm") || normalizedCondition.includes("thunder")) {
+    return iconMapping["thunderstorms"];
+  } else if (normalizedCondition.includes("snow")) {
+    return iconMapping["snow"];  
+  } else if (normalizedCondition.includes("mist")) {
+    return iconMapping["mist"];  
+  } else {
+    return "/imgs/default.png";  // Default icon if no match is found
+  }
 }
 
-// function to get precipitation (in mm)
+
 function getPrecipitation(weatherData) {
   if (weatherData.rain && weatherData.rain["1h"]) {
     return weatherData.rain["1h"]; // Precipitation in the last hour
   }
   return 0;
-}
-
-// Format the sunset time
-function formatSunset(timestamp) {
-  const sunsetDate = new Date(timestamp * 1000); 
-  const hours = sunsetDate.getHours().toString().padStart(2, '0');
-  const minutes = sunsetDate.getMinutes().toString().padStart(2, '0');
-  return `${hours}:${minutes}`; 
 }
 
 export { fetchWeather, fetchForecast };

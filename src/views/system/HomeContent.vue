@@ -6,8 +6,8 @@
           <v-card class="weather mx-auto mt-4" elevation="0" style="border: none;">
             <v-card-item title="Butuan City">
               <template v-slot:subtitle>
-                <span style="font-size: 13.5px;">
-                  {{ currentWeather.description }}
+                <span class="desc" style="font-size: 15.5px;">
+                  {{ currentWeather.condition }}
                 </span>
               </template>
             </v-card-item>
@@ -18,7 +18,7 @@
                   {{ currentWeather.temperature }}&deg;{{ unitsStore.tempUnit }}
                 </v-col>
                 <v-col class="weather-icon text-right" cols="6">
-                  <img :src="currentWeather.icon" alt="Weather Icon" width="150" />
+                  <img :src="currentWeather.icon" alt="Weather Icon" width="180" />
                 </v-col>
               </v-row>
             </v-card-text>
@@ -103,20 +103,23 @@
         <!-- Activity Suggestion Carousel-->
         <v-container class="suggestions">
           <v-col>
-            <v-text class="suggestion-title" style="margin-left: 20px; color:gray;">Activity Suggestions</v-text>
-            <v-carousel height="150" :show-arrows="false" cycle hide-delimiters>
+            <v-text class="suggestion-title mb-10" style="margin-left: 20px; color:gray;">Activity Suggestions</v-text>
+            <v-carousel height="200" :show-arrows="false" cycle hide-delimiters>
               <v-carousel-item v-for="(activity, i) in activitySuggestions" :key="i">
                 <v-sheet color="transparent" height="100%">
                   <div class="d-flex fill-height justify-center align-center flex-column text-center">
+                    <!-- Add the image here -->
+                    <img :src="activity.icon" alt="activity-icon" class="activity-icon mt-10"
+                      style="max-width: 100px; margin-bottom: 10px;" />
                     <div class="suggestion-text text-h5 font-weight-bold">{{ activity.title }}</div>
-                    <div class="text-body-1" style="color: #708090;">{{ activity.description }}
-                    </div>
+                    <div class="text-body-1 mb-10" style="color: #708090;">{{ activity.description }}</div>
                   </div>
                 </v-sheet>
               </v-carousel-item>
             </v-carousel>
           </v-col>
         </v-container>
+
 
         <!-- Weather Conditions Card -->
         <v-card class="weather-conditions mx-auto mt-4 text-white" elevation="0">
@@ -155,21 +158,21 @@
 
                   <div class="d-flex flex-column mt-4">
                     <div class="d-flex align-center">
-                      <v-icon class="mr-2" size="28">mdi-speedometer</v-icon>
-                      <span style="color: gray; font-size: 15px;">Air Pressure</span>
+                      <v-icon class="mr-1" size="28">mdi-weather-sunny</v-icon>
+                      <span style="color: gray; font-size: 15px;">Condition</span>
                     </div>
-                    <strong class="temperature-value" style="font-size: 20px;">{{ currentWeather.pressure }}
-                      hPa</strong>
+                    <strong class="temperature-value" style="font-size: 20px;">{{ currentWeather.condition }}</strong>
                   </div>
                 </v-col>
 
                 <v-col cols="5">
                   <div class="d-flex flex-column">
                     <div class="d-flex align-center">
-                      <v-icon class="mr-1" size="28">mdi-weather-sunny</v-icon>
-                      <span style="color: gray; font-size: 15px;">Condition</span>
+                      <v-icon class="mr-2" size="28">mdi-speedometer</v-icon>
+                      <span style="color: gray; font-size: 15px;">Air Pressure</span>
                     </div>
-                    <strong class="temperature-value" style="font-size: 20px;">{{ currentWeather.condition }}</strong>
+                    <strong class="temperature-value" style="font-size: 20px;">{{ currentWeather.pressure }}
+                      hPa</strong>
                   </div>
 
                   <div class="d-flex flex-column mt-4">
@@ -217,15 +220,14 @@
               <div class="d-flex align-center">
                 <span></span>
               </div>
-              <div class="air-quality-description" style="margin-left: 5px; color:#708090; ">
+              <div class="air-quality-description" style="margin-left: 5px; color:#708090;">
                 <p>
-                  <span v-if="airQuality.status === 'Good'"> The air quality is considered
-                    satisfactory, and air pollution poses little or no risk.</span>
-                  <span v-else-if="airQuality.status === 'Moderate'"> Air quality is acceptable;
-                    however, for some pollutants, there may be a moderate health concern for a very
-                    small number of people.</span>
-                  <span v-else> Everyone may begin to experience health effects; members of sensitive
-                    groups may experience more serious health effects.</span>
+                  <span v-if="airQuality.status === 'Good'"> The air quality is considered satisfactory, and air
+                    pollution poses little or no risk.</span>
+                  <span v-else-if="airQuality.status === 'Moderate'"> Air quality is acceptable; however, for some
+                    pollutants, there may be a moderate health concern for a very small number of people.</span>
+                  <span v-else> Everyone may begin to experience health effects; members of sensitive groups may
+                    experience more serious health effects.</span>
                 </p>
               </div>
             </v-card-text>
@@ -236,6 +238,7 @@
             </div>
           </v-container>
         </v-card>
+
       </v-col>
 
       <!-- 2nnnndddddd Colummmmnnnnn -->
@@ -308,7 +311,7 @@
               <div class="sunrise text-left">
                 <v-icon class="sun-icon">mdi-weather-sunset-up</v-icon>
                 <span class="sunrise-label">Sunrise</span>
-                <span class="sunrise-time">6:30 AM</span>
+                <span class="sunrise-time">{{ currentWeather.sunrise }}</span>
               </div>
 
               <div class="sunset text-left">
@@ -321,13 +324,16 @@
         </v-card>
 
         <!-- Qoute Carddddd -->
-        <v-card class="quote-card text-white mt-8 mb-16" height="330px"
+        <v-card class="quote-card text-white mt-8 mb-16" height="350px"
           style="display: flex; justify-content: center; align-items: center; background-color:#2a2e3b; border-radius: 30px;">
-          <div class="weather-quote" style="text-align: center; padding: 50px;">
+          <div class="weather-quote"
+            style="text-align: center; padding: 30px; display: flex; flex-direction: column; align-items: center;">
+            <img :src="currentQuoteImage" alt="Author"
+              style="border-radius: 50%; width: 100px; height: 100px; margin-bottom: 0px; object-fit: cover;" />
             <blockquote>
-              <p><strong><span style="font-size: 25px;">" </span>{{ currentQuote }}<span style="font-size: 25px;">
+              <p><strong><span style="font-size: 23px;">" </span>{{ currentQuote }}<span style="font-size: 25px;">
                     "</span></strong></p>
-              <footer class="text-right mt-10">— {{ currentAuthor }}</footer>
+              <footer class="text-right mt-5">— {{ currentAuthor }}</footer>
             </blockquote>
           </div>
         </v-card>
@@ -341,19 +347,20 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue';
-import { fetchWeather, fetchForecast } from '@/utils/useWeather'; 
+import { fetchWeather, fetchForecast } from '@/utils/useWeather';
 import { useUnitsStore } from '@/stores/unit';
 
 const unitsStore = useUnitsStore();
+const currentQuote = ref('');
+const currentAuthor = ref('');
+const currentQuoteImage = ref('');
+let quoteTimer = null; // Timer ID for clearing interval
+let index = 0;
 
 const currentWeather = ref({});
 const hourlyForecast = ref([]);
 const airQuality = ref({ status: 'Good', pm25: 15 });
 const activitySuggestions = ref([]);
-const currentQuote = ref('');
-const currentAuthor = ref('');
-let index = 0;
-
 
 const weather = ref({
   feelsLike: 0,
@@ -364,82 +371,197 @@ const weather = ref({
   windSpeed: 0,
   visibility: 0,
   clouds: 0,
+  sunrise: '',
   sunset: '',
   condition: '',
   icon: '',
 });
 
-
-
-// City to get weather for
 const fiveDayForecast = ref([]);
 const city = 'Butuan City';
 
-// Function to load weather data
+// Function to load weather and air quality data
 const loadWeatherData = async () => {
   try {
+    console.log(`Fetching weather data for: ${city}`);
+
     // Fetch current weather
-    const weather = await fetchWeather(city);
-    currentWeather.value = weather;
+    const weatherData = await fetchWeather(city);
+    currentWeather.value = weatherData;
 
     // Fetch forecast data
     const forecast = await fetchForecast(city);
     hourlyForecast.value = forecast.hourlyForecast;
-    fiveDayForecast.value = forecast.fiveDayForecast; 
+    fiveDayForecast.value = forecast.fiveDayForecast;
 
-    console.log("Hourly Forecast:", hourlyForecast.value);
-    console.log("5-Day Forecast:", fiveDayForecast.value); 
+    // Assuming air quality data is available in the weatherData (you might need to adjust this)
+    airQuality.value.pm25 = weatherData.pm25 || 15; // Default to 15 if no value found
+    airQuality.value.status = determineAirQualityStatus(airQuality.value.pm25);
+
+    // Log the air quality data to console
+    console.log('Air Quality:', airQuality.value);
+
+    console.log('Current Weather:', currentWeather.value);
+    console.log('Hourly Forecast:', hourlyForecast.value);
+    console.log('5-Day Forecast:', fiveDayForecast.value);
+
+    loadActivitiesBasedOnWeather();
   } catch (error) {
     console.error('Error loading weather data:', error);
   }
 };
 
-
-// Function to load activities based on weather
-const loadActivitiesBasedOnWeather = () => {
-  if (hourlyForecast.value.length && hourlyForecast.value[0].image === '/imgs/sun.png') {
-    activitySuggestions.value = [
-      { title: 'Go Hiking', description: 'Enjoy the scenic trails near you.', color: '#FFEB3B' },
-      { title: 'Outdoor Picnic', description: 'Have a relaxing day at the park.', color: '#FF9800' },
-    ];
+// Function to determine air quality status based on PM2.5 level
+const determineAirQualityStatus = (pm25) => {
+  if (pm25 <= 50) {
+    return 'Good';
+  } else if (pm25 <= 100) {
+    return 'Moderate';
+  } else if (pm25 <= 150) {
+    return 'Unhealthy for Sensitive Groups';
+  } else if (pm25 <= 200) {
+    return 'Unhealthy';
+  } else if (pm25 <= 300) {
+    return 'Very Unhealthy';
   } else {
+    return 'Hazardous';
+  }
+};
+
+// Function to load activity suggestions based on weather condition
+const loadActivitiesBasedOnWeather = () => {
+  const condition = currentWeather.value.condition.toLowerCase();
+
+  // Log the condition for debugging
+  console.log(`Weather Condition: ${condition}`);
+
+  // Clear or sunny weather
+  if (condition.includes('clear') || condition.includes('sunny')) {
     activitySuggestions.value = [
-      { title: 'Read a Book', description: 'Get cozy with a good book.', color: '#5C6BC0' },
+      { title: 'Go Hiking', description: 'Explore scenic trails and enjoy nature.', color: '#FFEB3B', icon: '/imgs/hiking.png' },
+      { title: 'Outdoor Picnic', description: 'Have a relaxing day at the park with family or friends.', color: '#FF9800', icon: '/imgs/picnic.png' },
+      { title: 'Bike Ride', description: 'Go for a refreshing bike ride to nearby attractions.', color: '#4CAF50', icon: '/imgs/bike.png' },
+      { title: 'Photography Walk', description: 'Capture the beauty of a sunny day with your camera.', color: '#FFC107', icon: '/imgs/photograph.png' },
+    ];
+  } 
+  // Rain-related conditions (rain, drizzle, overcast, etc.)
+  else if (
+    condition.includes('rain') || 
+    condition.includes('drizzle') || 
+    condition.includes('showers') || 
+    condition.includes('overcast') || 
+    condition.includes('cloud')
+  ) {
+    activitySuggestions.value = [
+      { title: 'Carry an Umbrella', description: 'Be prepared for the rain by bringing an umbrella.', color: '#2196F3', icon: '/imgs/umbrellaa.png' },
+      { title: 'Drink Coffee', description: 'Warm yourself up with a comforting cup of coffee.', color: '#795548',icon: '/imgs/coffee.png' },
+      { title: 'Watch a Movie', description: 'Enjoy a cozy indoor movie marathon.', color: '#607D8B', icon: '/imgs/movie.png' },
+      { title: 'Bake Some Treats', description: 'Try baking cookies or a cake at home.', color: '#FF5722', icon: '/imgs/bake.png' },
+      { title: 'Indoor Gardening', description: 'Spruce up your indoor space with some plants.', color: '#8BC34A', icon: '/imgs/gardening.png' },
+      { title: 'Play Board Games', description: 'Have fun playing classic board games with family.', color: '#3F51B5', icon: '/imgs/games.png' },
+    ];
+  } 
+  // Storm-related conditions (thunderstorm, lightning, etc.)
+  else if (
+    condition.includes('storm') || 
+    condition.includes('thunder') || 
+    condition.includes('lightning')
+  ) {
+    activitySuggestions.value = [
+      { title: 'Stay Safe Indoors', description: 'Stay indoors and avoid venturing out during the storm.', color: '#FF0000', icon: '/imgs/safety.png' },
+      { title: 'Avoid Electrical Appliances', description: 'Unplug sensitive devices and avoid using electrical items.', color: '#FFC107', icon: '/imgs/electric.png' },
+      { title: 'Listen to Weather Updates', description: 'Stay informed by tuning in to weather updates.', color: '#03A9F4', icon: '/imgs/update.png' },
+      { title: 'Prepare an Emergency Kit', description: 'Keep essentials like water, flashlights, and first aid ready.', color: '#4CAF50', icon: '/imgs/emergency.png' },
+      { title: 'Backup Power Sources', description: 'Charge all devices and keep portable power banks ready.', color: '#9E9E9E', icon: '/imgs/charge.png' },
+    ];
+  } 
+  // Snow-related conditions
+  else if (condition.includes('snow') || condition.includes('sleet')) {
+    activitySuggestions.value = [
+      { title: 'Build a Snowman', description: 'Have fun sculpting a snowman with friends.', color: '#00BCD4', icon: '/imgs/snowman.png' },
+      { title: 'Hot Cocoa Night', description: 'Warm up with a cup of hot cocoa by the fire.', color: '#795548', icon: '/imgs/cocoa.png' },
+      { title: 'Snowball Fight', description: 'Enjoy a playful snowball fight outdoors.', color: '#3F51B5', icon: '/imgs/snowball.png' },
+      { title: 'Winter Photography', description: 'Capture stunning photos of snow-covered scenery.', color: '#E91E63', icon: '/imgs/photograph.png' },
+    ];
+  } 
+  // Default (foggy, mist, hazy, or unclassified weather)
+  else {
+    activitySuggestions.value = [
+      { title: 'Read a Book', description: 'Immerse yourself in a good book.', color: '#5C6BC0', icon: '/imgs/read.png' },
+      { title: 'Meditate', description: 'Take a moment to focus on your breathing and relax.', color: '#9C27B0', icon: '/imgs/meditate.png' },
+      { title: 'Home Workout', description: 'Stay active with an indoor workout session.', color: '#F44336', icon: '/imgs/workout.png' },
+      { title: 'Learn a New Recipe', description: 'Experiment in the kitchen with a new dish.', color: '#FF9800', icon: '/imgs/recipe.png' },
     ];
   }
+
+  // Log suggestions for debugging
+  console.log('Activity Suggestions:', activitySuggestions.value);
 };
 
 // Quotes logic
 const quotes = ref([
-  { text: "There’s no such thing as bad weather, only inappropriate clothing.", author: "Sir Ranulph Fiennes" },
-  { text: "The sun is a daily reminder that we too can rise again from the darkness.", author: "Unknown" },
+  { text: "There’s no such thing as bad weather, only inappropriate clothing.", author: "Sir Ranulph Fiennes", image: "/imgs/ranulph.jpg" },
+  { text: "The sun is a daily reminder that we too can rise again from the darkness.", author: "Unknown", image: "/imgs/unknown.jpg" },
+  { text: "It is not the strongest of the species that survive, nor the most intelligent, but the one most responsive to change.", author: "Charles Darwin", image: "/imgs/darwin.jpg" },
+  { text: "The earth has music for those who listen.", author: "George Santayana", image: "/imgs/George.jpg" },
+  { text: "In every walk with nature, one receives far more than he seeks.", author: "John Muir", image: "/imgs/john.jpg" },
+  { text: "A little rain each day will quench the drought.", author: "Anonymous", image: "/imgs/anonymous.jpg" },
+  { text: "Sunshine is delicious, rain is refreshing, wind braces us up, snow is exhilarating; there’s really no such thing as bad weather, only different kinds of good weather.", author: "John Ruskin", image: "/imgs/john-ruskin.jpg" },
+  { text: "Every storm runs out of rain.", author: "Maya Angelou", image: "/imgs/maya.jpg" },
+  { text: "In the midst of winter, I found there was, within me, an invincible summer.", author: "Albert Camus", image: "/imgs/albert-camus.jpg" },
+  { text: "The sky is the daily bread of the eyes.", author: "Ralph Waldo Emerson", image: "/imgs/emerson.jpg" },
+  { text: "Weather is a great metaphor for life—sometimes it's good, sometimes it's bad, and there's nothing much you can do about it but carry an umbrella.", author: "Terry Pratchett", image: "/imgs/terry.jpg" },
+  { text: "If you don't like the weather in New England, just wait a few minutes.", author: "Mark Twain", image: "/imgs/mark.jpg" },
+  { text: "The best time to plant a tree was twenty years ago. The second best time is now.", author: "Chinese Proverb", image: "/imgs/chinese.jpg" },
+  { text: "In the middle of difficulty lies opportunity.", author: "Albert Einstein", image: "/imgs/albert.jpg" },
+  { text: "Rain is not a period of despair. It is a symbol of life.", author: "Unknown", image: "/imgs/unknown.jpg" },
+  { text: "A change in the weather is sufficient to recreate the world and ourselves.", author: "Marcel Proust", image: "/imgs/marcel.jpg" },
+  { text: "To appreciate the beauty of a snowflake, it is necessary to stand out in the cold.", author: "Aristotle", image: "/imgs/aristotle.jpg" }
 ]);
+
 
 const updateQuote = () => {
   currentQuote.value = quotes.value[index].text;
   currentAuthor.value = quotes.value[index].author;
+  currentQuoteImage.value = quotes.value[index].image;
   index = (index + 1) % quotes.value.length;
 };
 
+// Lifecycle hooks
 onMounted(() => {
-  loadWeatherData(); 
-  loadActivitiesBasedOnWeather();
+  loadWeatherData();
   updateQuote();
-  setInterval(updateQuote, 3000); 
+  quoteTimer = setInterval(updateQuote, 3000); // Save timer ID
 });
 
 onBeforeUnmount(() => {
-  clearInterval(updateQuote);
+  clearInterval(quoteTimer); // Clear timer properly
 });
 </script>
+
+
 
 
 
 <style scoped>
 @media (max-width: 600px) {
   .temp-font {
-    font-size: 55px !important;; 
+    font-size: 55px !important;
   }
+  .desc{
+    font-size: 11.5px;
+  }
+  .temperature-value{
+    font-size: 18px !important
+  }
+  .weather-icon img{
+    width: 148px !important;
+    height: auto !important;
+  }
+  blockquote {
+  margin-top: 10px;
+  font-size: 1.1rem !important;
+}
 }
 .forecast-item-btn{
   color:white;
