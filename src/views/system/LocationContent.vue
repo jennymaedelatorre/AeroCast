@@ -170,7 +170,7 @@
         <v-card class="weather mx-auto mt-4" elevation="0" style="border: none;" v-if="selectedCity">
           <v-card-item :title="selectedCity">
             <template v-slot:subtitle>
-              <span style="font-size: 13.5px;">
+              <span class="desc"style="font-size: 13.5px;">
                 {{ cityWeather[selectedCity].description }}
               </span>
             </template>
@@ -389,7 +389,11 @@ export default {
     font-size: 20px !important;
   }
   .add-city{
-    font-size: 8px !important;
+    font-size: 10px !important;
+    font-weight: bold;
+  }
+  .desc{
+    font-size: 11.5px !important;
   }
   .see-more{
     margin-bottom: 5px;
