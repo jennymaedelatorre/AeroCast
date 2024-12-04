@@ -22,3 +22,5 @@ export const isAuthenticated = async () => {
 
     return !!data.session
 }
+
+export default supabase;

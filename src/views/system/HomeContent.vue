@@ -15,7 +15,9 @@
             <v-card-text class="mb-5">
               <v-row align="center" no-gutters>
                 <v-col class="text-h1 temp-font" cols="6" style="font-weight: bolder;">
-                  {{ currentWeather.temperature }}&deg;{{ unitsStore.tempUnit }}
+                  {{ currentWeather.temperature }}&deg;{{ formattedTemperature }}
+                  <span v-if="unitsStore.tempUnit === 'C'">C</span>
+                  <span v-if="unitsStore.tempUnit === 'F'">F</span>
                 </v-col>
                 <v-col class="weather-icon text-right" cols="6">
                   <img :src="currentWeather.icon" alt="Weather Icon" width="180" />
@@ -42,7 +44,9 @@
                       <div style="color:gray">{{ time.hour }}</div>
                       <img :src="time.image" alt="Weather" width="50" />
                       <div style="font-size: 18px; font-weight: bolder;">
-                        {{ time.temperature }}&deg;{{ unitsStore.tempUnit }}
+                        {{ time.temperature }}&deg;{{ formattedTemperature }}
+                        <span v-if="unitsStore.tempUnit === 'C'">C</span>
+                        <span v-if="unitsStore.tempUnit === 'F'">F</span>
                       </div>
                     </div>
                   </v-btn>
@@ -131,13 +135,15 @@
             <v-divider></v-divider>
             <v-card-text>
               <v-row>
-                <v-col cols="7">
-                  <div class="d-flex flex-column">
+                <v-col cols="6">
+                  <div class="d-flex flex-column ">
                     <div class="d-flex align-center">
                       <v-icon class="mr-1" size="28">mdi-thermometer</v-icon>
                       <span style="color: gray; font-size: 15px;">Feels like</span>
                     </div>
-                    <strong class="temperature-value" style="font-size: 20px;">{{ currentWeather.feelsLike }}°C</strong>
+                    <strong class="temperature-value" style="font-size: 20px;">{{ currentWeather.feelsLike }}°{{ formattedTemperature }}
+                        <span v-if="unitsStore.tempUnit === 'C'">C</span>
+                        <span v-if="unitsStore.tempUnit === 'F'">F</span></strong>
                   </div>
 
                   <div class="d-flex flex-column mt-4">
@@ -165,26 +171,26 @@
                   </div>
                 </v-col>
 
-                <v-col cols="5">
-                  <div class="d-flex flex-column">
+                <v-col cols="6">
+                  <div class="d-flex1 flex-column">
                     <div class="d-flex align-center">
                       <v-icon class="mr-2" size="28">mdi-speedometer</v-icon>
                       <span style="color: gray; font-size: 15px;">Air Pressure</span>
                     </div>
-                    <strong class="temperature-value" style="font-size: 20px;">{{ currentWeather.pressure }}
-                      hPa</strong>
+                    <strong class="temperature-value" style="font-size: 20px;">{{ currentWeather.pressure }}{{ setPressureUnit }}
+                      </strong>
                   </div>
 
-                  <div class="d-flex flex-column mt-4">
+                  <div class="d-flex1 flex-column mt-4">
                     <div class="d-flex align-center">
                       <v-icon class="mr-2" size="28">mdi-weather-windy</v-icon>
                       <span style="color: gray; font-size: 15px;">Wind</span>
                     </div>
-                    <strong class="temperature-value" style="font-size: 20px;">{{ currentWeather.windSpeed }}
-                      m/s</strong>
+                    <strong class="temperature-value" style="font-size: 20px;">{{ currentWeather.windSpeed }} m/s
+                    </strong>
                   </div>
 
-                  <div class="d-flex flex-column mt-4">
+                  <div class="d-flex1 flex-column mt-4">
                     <div class="d-flex align-center">
                       <v-icon class="mr-2" size="28">mdi-eye</v-icon>
                       <span style="color: gray; font-size: 15px;">Visibility</span>
@@ -193,7 +199,7 @@
                       km</strong>
                   </div>
 
-                  <div class="d-flex flex-column mt-4">
+                  <div class="d-flex1 flex-column mt-4">
                     <div class="d-flex align-center">
                       <v-icon class="mr-2" size="28">mdi-weather-sunset</v-icon>
                       <span style="color: gray; font-size: 15px;">Sunset</span>
@@ -259,7 +265,9 @@
                     <div class="d-flex justify-space-between align-center">
                       <span style="color: gray">{{ day.date }}</span>
                       <img :src="day.icon" alt="Weather Icon" style="width: 40px; height: 40px; margin-right: 8px;" />
-                      <span class="ml" style="font-size: 20px;"><strong>{{ day.temperature }}°C</strong></span>
+                      <span class="ml" style="font-size: 20px;"><strong>{{ day.temperature }}°{{ formattedTemperature }}
+                        <span v-if="unitsStore.tempUnit === 'C'">C</span>
+                        <span v-if="unitsStore.tempUnit === 'F'">F</span></strong></span>
                     </div>
                   </v-list-item-title>
                 </v-list-item-content>
@@ -346,21 +354,44 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, onMounted, onBeforeUnmount,computed } from 'vue';
 import { fetchWeather, fetchForecast } from '@/utils/useWeather';
 import { useUnitsStore } from '@/stores/unit';
 
-const unitsStore = useUnitsStore();
+
 const currentQuote = ref('');
 const currentAuthor = ref('');
 const currentQuoteImage = ref('');
-let quoteTimer = null; // Timer ID for clearing interval
+let quoteTimer = null; 
 let index = 0;
 
 const currentWeather = ref({});
 const hourlyForecast = ref([]);
 const airQuality = ref({ status: 'Good', pm25: 15 });
 const activitySuggestions = ref([]);
+
+const unitsStore = useUnitsStore(); // Initialize the store
+
+onMounted(() => {
+  unitsStore.loadUnitsFromLocalStorage(); // Load units from localStorage
+  loadWeatherData(); // Load weather data
+  updateQuote(); // Set the quote
+  quoteTimer = setInterval(updateQuote, 3000); // Change the quote every 3 seconds
+});
+
+const temperatureDisplay = computed(() => {
+  return unitsStore.tempUnit === 'C'
+    ? `${currentWeather.value.temperature}°C`
+    : `${(currentWeather.value.temperature * 9) / 5 + 32}°F`;
+});
+
+
+const setPressureUnit = computed(() => {
+  return unitsStore.pressureUnit === 'hPa'
+    ? ' hPa'
+    : ' mmHg';
+});
+
 
 const weather = ref({
   feelsLike: 0,
@@ -394,11 +425,11 @@ const loadWeatherData = async () => {
     hourlyForecast.value = forecast.hourlyForecast;
     fiveDayForecast.value = forecast.fiveDayForecast;
 
-    // Assuming air quality data is available in the weatherData (you might need to adjust this)
-    airQuality.value.pm25 = weatherData.pm25 || 15; // Default to 15 if no value found
+    
+    airQuality.value.pm25 = weatherData.pm25 || 15; 
     airQuality.value.status = determineAirQualityStatus(airQuality.value.pm25);
 
-    // Log the air quality data to console
+    
     console.log('Air Quality:', airQuality.value);
 
     console.log('Current Weather:', currentWeather.value);
@@ -411,7 +442,7 @@ const loadWeatherData = async () => {
   }
 };
 
-// Function to determine air quality status based on PM2.5 level
+
 const determineAirQualityStatus = (pm25) => {
   if (pm25 <= 50) {
     return 'Good';
@@ -531,11 +562,11 @@ const updateQuote = () => {
 onMounted(() => {
   loadWeatherData();
   updateQuote();
-  quoteTimer = setInterval(updateQuote, 3000); // Save timer ID
+  quoteTimer = setInterval(updateQuote, 3000); 
 });
 
 onBeforeUnmount(() => {
-  clearInterval(quoteTimer); // Clear timer properly
+  clearInterval(quoteTimer); 
 });
 </script>
 
@@ -558,10 +589,16 @@ onBeforeUnmount(() => {
     width: 148px !important;
     height: auto !important;
   }
+  .d-flex{
+    margin-left: 0 !important;
+  }
+  .d-flex1{
+    margin-left: 0 !important;
+  }
   blockquote {
   margin-top: 10px;
   font-size: 1.1rem !important;
-}
+  }
 }
 .forecast-item-btn{
   color:white;
@@ -666,6 +703,13 @@ onBeforeUnmount(() => {
   transition: left 0.5s ease;
   z-index: 20;
 }
+.d-flex{
+    margin-left: 10px;
+  }
+
+.d-flex1{
+    margin-left: 80px;
+  }
 
 .details {
   display: flex;

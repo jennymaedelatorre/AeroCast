@@ -1,96 +1,41 @@
+// stores/unit.js
 import { defineStore } from 'pinia';
 
-export const useUnitsStore = defineStore('units', {
+export const useUnitsStore = defineStore('unitStore', {
   state: () => ({
-    tempUnit: 'C', 
-    windSpeedUnit: 'km/h',
-    pressureUnit: 'mm',
-    precipitationUnit: 'mm',
-    distanceUnit: 'km',
-    rawTempValue: 25, 
-    rawWindSpeedValue: 5, 
-    rawPressureValue: 1009, 
+    tempUnit: 'C',               // Default temperature unit
+    pressureUnit: 'hPa',         // Default pressure unit
+    precipitationUnit: 'mm',     // Default precipitation unit
   }),
-
   actions: {
-    setTempUnit(unit) {
+    // Action to change temperature unit and save it to localStorage
+    setTemperatureUnit(unit) {
       this.tempUnit = unit;
-    },
-    setWindSpeedUnit(unit) {
-      this.windSpeedUnit = unit;
+      localStorage.setItem('tempUnit', unit); // Save to localStorage
+      console.log(`Temperature unit set to: ${unit}`);
     },
     setPressureUnit(unit) {
       this.pressureUnit = unit;
+      localStorage.setItem('pressureUnit', unit); // Save to localStorage
+      console.log(`Pressure unit set to: ${unit}`);
     },
     setPrecipitationUnit(unit) {
       this.precipitationUnit = unit;
-    },
-    setDistanceUnit(unit) {
-      this.distanceUnit = unit;
-    },
-
-    // Conversion functions
-    convertTemperature(value) {
-      let result = value;
-      if (this.tempUnit === 'F') {
-        result = (value * 9/5) + 32; // Celsius to Fahrenheit
-      }
-      return result.toFixed(2); 
+      localStorage.setItem('precipitationUnit', unit); // Save to localStorage
+      console.log(`Precipitation unit set to: ${unit}`);
     },
 
-    convertWindSpeed(value) {
-      let result = value;
-      if (this.windSpeedUnit === 'm/s') {
-        result = value / 3.6; // Convert km/h to m/s
-      } else if (this.windSpeedUnit === 'knots') {
-        result = value * 0.53996; // Convert km/h to knots
-      }
-      return result.toFixed(2); 
-    },
+    // Method to load units from localStorage
+    loadUnitsFromLocalStorage() {
+      const savedTempUnit = localStorage.getItem('tempUnit');
+      const savedWindSpeedUnit = localStorage.getItem('windSpeedUnit');
+      const savedPressureUnit = localStorage.getItem('pressureUnit');
+      const savedPrecipitationUnit = localStorage.getItem('precipitationUnit');
 
-    convertPressure(value) {
-      let result = value;
-      if (this.pressureUnit === 'inch') {
-        result = value * 0.02953; // hPa to Inches
-      } else if (this.pressureUnit === 'kPa') {
-        result = value / 10; // hPa to kPa
-      }
-      return result.toFixed(2); 
-    },
-    
-    convertPrecipitation(value) {
-      let result = value;
-      if (this.precipitationUnit === 'inch') {
-        result = value * 0.03937; // Millimeters to Inches
-      }
-      return result.toFixed(2); 
-    },
-
-    convertDistance(value) {
-      let result = value;
-      if (this.distanceUnit === 'miles') {
-        result = value * 0.621371; // Kilometers to miles
-      }
-      return result.toFixed(2); 
-    },
-  },
-
-  // Computed properties for conversion
-  getters: {
-    convertedTemp() {
-      return parseFloat(this.convertTemperature(this.rawTempValue));
-    },
-    convertedWindSpeed() {
-      return parseFloat(this.convertWindSpeed(this.rawWindSpeedValue));
-    },
-    convertedPressure() {
-      return parseFloat(this.convertPressure(this.rawPressureValue));
-    },
-    convertedPrecipitation() {
-      return parseFloat(this.convertPrecipitation(this.rawPrecipitationValue));
-    },
-    convertedDistance() {
-      return parseFloat(this.convertDistance(this.rawDistanceValue));
-    },
+      if (savedTempUnit) this.tempUnit = savedTempUnit;
+      if (savedWindSpeedUnit) this.windSpeedUnit = savedWindSpeedUnit;
+      if (savedPressureUnit) this.pressureUnit = savedPressureUnit;
+      if (savedPrecipitationUnit) this.precipitationUnit = savedPrecipitationUnit;
+    }
   },
 });
