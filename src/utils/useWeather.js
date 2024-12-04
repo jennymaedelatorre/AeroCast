@@ -3,7 +3,7 @@ import { useUnitsStore } from '@/stores/unit';
 
 const apiKey = '54b6c73039702d61cc9c0e499bbe8cfc';
 
-// Function to fe tch air quality data
+// Function to fetch air quality data
 async function fetchAirQuality(lat, lon) {
   const airQualityUrl = 'https://api.openweathermap.org/data/2.5/air_pollution';
   try {
@@ -19,7 +19,7 @@ async function fetchAirQuality(lat, lon) {
 // Function to fetch weather data
 async function fetchWeather(city) {
   const baseUrl = 'https://api.openweathermap.org/data/2.5/weather';
-  const unitsStore = useUnitsStore(); // Access unit preferences
+  const unitsStore = useUnitsStore(); 
 
   try {
     const response = await axios.get(`${baseUrl}?q=${city}&appid=${apiKey}&units=metric`);
@@ -66,7 +66,7 @@ async function fetchWeather(city) {
 // Fetch the forecast
 async function fetchForecast(city) {
   const forecastUrl = 'https://api.openweathermap.org/data/2.5/forecast';
-  const unitsStore = useUnitsStore(); // Access unit preferences
+  const unitsStore = useUnitsStore(); 
 
   try {
     const response = await axios.get(`${forecastUrl}?q=${city}&appid=${apiKey}&units=metric`);
@@ -147,6 +147,7 @@ function getWeatherDescription(condition) {
     ash: 'Volcanic ash, stay indoors and protect your lungs',
     squall: 'Strong gusts of wind, take care',
     tornado: 'Tornado warning, take shelter immediately',
+    scattered: 'Scattered clouds, with occasional breaks in the clouds', 
   };
   return descriptionMapping[condition] || 'Weather condition is unclear';
 }
@@ -156,8 +157,9 @@ function getCustomWeatherIcon(condition) {
 
   const iconMapping = {
     sunny: '/imgs/sun.png',
-    clear: '/imgs/sun.png',
+    clear: '/imgs/clear.png',
     clouds: '/imgs/overcast-cloud.png',
+    scattered: '/imgs/scattered.png',
     partlycloudy: '/imgs/overcast-cloud.png',
     cloud: '/imgs/overcast-cloud.png',
     rain: '/imgs/rainy-cloud.png',
@@ -167,8 +169,12 @@ function getCustomWeatherIcon(condition) {
     mist: '/imgs/mist.png',
   };
 
-  if (normalizedCondition.includes('clear') || normalizedCondition.includes('sunny')) {
+  if (normalizedCondition.includes('sunny')){
     return iconMapping['sunny'];
+  } else if (normalizedCondition.includes('clear')) {
+    return iconMapping['clear'];
+  } else if (normalizedCondition.includes('scattered')) {
+    return iconMapping['scattered'];
   } else if (normalizedCondition.includes('cloud') || normalizedCondition.includes('partly cloudy')) {
     return iconMapping['clouds'];
   } else if (normalizedCondition.includes('rain') || normalizedCondition.includes('drizzle')) {
@@ -191,7 +197,7 @@ function getPrecipitation(weatherData) {
   return 0;
 }
 
-// Helper conversion functions
+
 function convertCelsiusToFahrenheit(celsius) {
   return (celsius * 9) / 5 + 32;
 }
