@@ -4,47 +4,66 @@
       <!-- Left Section: Search and City Cards -->
       <v-col cols="12" lg="8">
         <!-- Search Bar -->
-        <v-text-field 
-          label="Search for Cities"
-          filled dense rounded solo flat
-          background-color="grey lighten-3"
-          append-inner-icon="mdi-magnify"
-          @click:append="onSearchClick"
-        ></v-text-field>
+        <v-text-field label="Search for Cities" filled dense rounded solo flat background-color="grey lighten-3"
+          append-inner-icon="mdi-magnify" @click:append="onSearchClick"></v-text-field>
 
-        <!-- Add City Menu -->
-        <v-menu>
-          <template v-slot:activator="{ props }">
-            <v-btn color="primary" class="add-city mb-5" v-bind="props">
-              Add City
-            </v-btn>
-          </template>
-          <v-list>
-            <v-list-item v-for="(item, index) in items" :key="index" :value="index">
-              <v-list-item-title>{{ item.title }}</v-list-item-title>
-            </v-list-item>
-          </v-list>
-        </v-menu>
+        <!-- Add City Button and Dialog -->
+        <v-btn color="primary" class="add-city mb-5" @click="dialog = true">
+          Add City
+        </v-btn>
+
+        <!-- Dialog for Adding a New City -->
+        <v-dialog v-model="dialog" max-width="400px">
+          <v-card>
+            <v-card-title>
+              <span>Add New City</span>
+            </v-card-title>
+
+            <v-card-text>
+              <v-text-field v-model="newCityName" label="Enter City Name" outlined dense></v-text-field>
+            </v-card-text>
+
+            <v-card-actions>
+              <v-btn color="primary" text @click="handleAddCity">Add</v-btn>
+              <v-btn color="red" text @click="dialog = false">Cancel</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+
 
         <!-- City Cards (Dynamic Generation) -->
-        <v-card
-          v-for="(city, index) in items"
-          :key="index"
-          class="city-card text-white mt-5"
-          :style="{
-            ...activeCardStyle(city.title),
-            height: '250px',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            borderRadius: '30px',
-            border: selectedCity === city.title ? '2px solid white' : 'none'
-          }"
-        >
+        <v-card v-for="(city, index) in items" :key="index" class="city-card text-white mt-5" :style="{
+          ...activeCardStyle(city.title),
+          height: '250px',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          borderRadius: '30px',
+          border: selectedCity === city.title ? '2px solid white' : 'none'
+        }">
           <!-- City Weather Icon and Title -->
           <v-col class="weather-icon text-left ms-5 d-flex" style="display: flex; align-items: center;">
-            <img :src="cityWeather[city.title]?.icon || 'default-icon.png'" alt="Weather" width="120" />
-            <h2 class="ms-3">{{ city.title }}</h2>
+            <!-- Image and Condition (Vertical Stack) -->
+            <div
+              style="display: flex; flex-direction: column; align-items: center; padding-left: 30px; padding-top: 20px;">
+              <!-- Weather Icon -->
+              <img :src="cityWeather[city.title]?.icon || 'default-icon.png'" alt="" width="120" />
+
+              <!-- Weather Condition Below the Icon -->
+              <p v-if="!cityWeather[city.title]?.condition"
+                style="color: lightgray; font-size: 14px; margin-top: 10px;">
+                Loading weather condition...
+              </p>
+              <p v-else style="color: lightgray; font-size: 14px; margin-top: 10px;">
+                {{ cityWeather[city.title]?.condition }}
+              </p>
+            </div>
+
+            <!-- City Title and Description Beside Image -->
+            <div class="ms-8" style="flex: 1;">
+              <h2>{{ city.title }}</h2>
+              <p>{{ city.description }}</p>
+            </div>
           </v-col>
 
           <!-- Temperature and Actions -->
@@ -55,11 +74,12 @@
             <v-btn color="primary" rounded @click="onSeeMoreClick(city.title)" class="see-more">
               <h4 style="font-size: 11px;">Set default</h4>
             </v-btn>
-            <v-btn color="red" rounded @click="onDeleteCity(city.title)" class="delete-city" style="margin-left: 10px;">
+            <v-btn color="red" rounded @click="deleteCity(city.title)" class="delete-city" style="margin-left: 10px;">
               <h4 style="font-size: 10px;">Delete</h4>
             </v-btn>
           </v-col>
         </v-card>
+
       </v-col>
 
       <!-- Right Section: Selected City Details -->
@@ -111,15 +131,10 @@
         </v-card>
 
         <!-- 3-Day Weather Forecast -->
-        <v-card
-          class="forecast-card text-white"
-          elevation="0"
-          style="background-color: #2a2e3b; padding: 20px; margin-top: 20px;"
-          v-if="selectedCity"
-        >
+        <v-card class="forecast-card text-white" elevation="0"
+          style="background-color: #2a2e3b; padding: 20px; margin-top: 20px;" v-if="selectedCity">
           <v-card-title
-            style="font-size: 16px; text-align: center; margin-bottom: 20px; margin-top: 10px; color: gray;"
-          >
+            style="font-size: 16px; text-align: center; margin-bottom: 20px; margin-top: 10px; color: gray;">
             <v-icon left class="mr-2">mdi-calendar</v-icon>
             3-Day Weather Forecast
           </v-card-title>
@@ -157,35 +172,38 @@ import { useUnitsStore } from '@/stores/unit';
 export default {
   data() {
     return {
-      items: [], // Dynamically populated list of cities
-      selectedCity: null, 
-      cityWeather: {}, // Stores weather data dynamically based on fetched cities
-      hourlyForecast: [],  
-      threeDayForecast: [],  
-      isLoading: true, // Loading state for fetching data
-      error: null, // Error state
+      items: [],
+      selectedCity: null,
+      cityWeather: {},
+      hourlyForecast: [],
+      threeDayForecast: [],
+      isLoading: true,
+      error: null,
+      dialog: false,
+      newCityName: '',
     };
   },
 
   async mounted() {
-    this.unitsStore = useUnitsStore(); // Initialize the units store
-    this.unitsStore.loadUnitsFromLocalStorage(); // Load saved units
+    this.unitsStore = useUnitsStore();
+    this.unitsStore.loadUnitsFromLocalStorage();
 
-    // Fetch cities from Supabase on mount
+    // Fetch cities from Supabase
     await this.fetchCitiesFromSupabase();
 
     // Fetch weather data for each city
-    this.items.forEach(city => {
+    this.items.forEach((city) => {
       const cityName = city.title;
       this.cityWeather[cityName] = { temperature: null, condition: '', icon: '', description: '' };
       this.fetchWeather(cityName);
       this.fetchForecast(cityName);
     });
 
-    this.isLoading = false; // Mark loading as complete
+    this.isLoading = false;
   },
 
   methods: {
+    // Fetch cities from the Supabase database
     async fetchCitiesFromSupabase() {
       try {
         this.isLoading = true;
@@ -193,14 +211,14 @@ export default {
         // Fetch cities from the 'locations' table
         const { data: cityData, error } = await supabase
           .from('locations')
-          .select('city'); // Adjust column name as per your table schema
+          .select('city');
 
         if (error) {
           throw new Error(`Error fetching locations: ${error.message}`);
         }
 
-        // Populate the items array with fetched cities
-        this.items = cityData.map(city => ({ title: city.city }));
+
+        this.items = cityData.map((city) => ({ title: city.city }));
       } catch (err) {
         console.error('Unexpected error while fetching cities from Supabase:', err.message);
         this.error = err.message;
@@ -209,18 +227,78 @@ export default {
       }
     },
 
+    // Add a new city
+    async handleAddCity() {
+      if (!this.newCityName.trim()) {
+        console.error('City name is required.');
+        return;
+      }
+
+      try {
+        // Add new city to Supabase
+        const { data, error } = await supabase.from('locations').insert([{ city: this.newCityName }]);
+
+        if (error) {
+          throw new Error(`Failed to add city: ${error.message}`);
+        }
+
+        // Add the new city to items and fetch its weather data
+        this.items.push({ title: this.newCityName });
+        this.cityWeather[this.newCityName] = { temperature: null, condition: '', icon: '', description: '' };
+        await this.fetchWeather(this.newCityName);
+        await this.fetchForecast(this.newCityName);
+
+        console.log(`City "${this.newCityName}" added successfully.`);
+        console.log(`Weather for "${this.newCityName}":`, this.cityWeather[this.newCityName]);
+
+        // Reset input and close dialog
+        this.newCityName = '';
+        this.dialog = false;
+      } catch (err) {
+        console.error('Error adding city:', err.message);
+      }
+    },
+
+    // Delete an existing city
+    async deleteCity(cityName) {
+      try {
+        // Delete city from Supabase
+        const { data, error } = await supabase.from('locations').delete().eq('city', cityName);
+
+        if (error) {
+          throw new Error(`Error deleting city: ${error.message}`);
+        }
+
+        // Remove city from items array and cityWeather object
+        this.items = this.items.filter((city) => city.title !== cityName);
+        delete this.cityWeather[cityName];
+
+        // Reset selected city if the deleted city was selected
+        if (this.selectedCity === cityName) {
+          this.selectedCity = this.items.length > 0 ? this.items[0].title : null;
+        }
+
+        console.log(`City "${cityName}" deleted successfully.`);
+      } catch (err) {
+        console.error('Unexpected error while deleting city:', err.message);
+        this.error = err.message;
+      }
+    },
+
+    // Fetch weather data for a specific city
     async fetchWeather(city) {
       try {
         const weatherData = await fetchWeather(city);
         this.cityWeather[city] = weatherData;
         if (!this.selectedCity) {
-          this.selectedCity = city; // Set the first city as the selected city
+          this.selectedCity = city;
         }
       } catch (error) {
         console.error(`Error fetching weather for ${city}:`, error);
       }
     },
 
+    // Fetch forecast data for a specific city
     async fetchForecast(city) {
       try {
         const { hourlyForecast, threeDayForecast } = await fetchForecast(city);
@@ -231,15 +309,17 @@ export default {
       }
     },
 
+
     onSeeMoreClick(city) {
       this.selectedCity = city;
       this.fetchWeather(city);
       this.fetchForecast(city);
     },
 
+
     activeCardStyle(city) {
       return {
-        backgroundColor: this.selectedCity === city ? 'transparent' : '#2a2e3b', 
+        backgroundColor: this.selectedCity === city ? 'transparent' : '#2a2e3b',
       };
     },
   },
@@ -253,6 +333,7 @@ export default {
   padding: 10px 10%;
   border-radius: 10px;
 }
+
 .weather {
   background-color: transparent;
   color: white;
@@ -317,14 +398,17 @@ export default {
   .city-card h2 {
     font-size: 20px !important;
   }
-  .add-city{
+
+  .add-city {
     font-size: 10px !important;
     font-weight: bold;
   }
-  .desc{
+
+  .desc {
     font-size: 11.5px !important;
   }
-  .see-more{
+
+  .see-more {
     margin-bottom: 5px;
   }
 
