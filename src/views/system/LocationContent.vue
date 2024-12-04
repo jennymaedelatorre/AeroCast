@@ -248,7 +248,41 @@
 
 
 <script>
+import supabase from '@/utils/supabase';
 import { fetchWeather, fetchForecast } from '@/utils/useWeather';
+import { useUnitsStore } from '@/stores/unit';
+
+// Function to fetch the user's favorite books from Supabase
+const fetchCitiesFromSupabase = async () => {
+  try {
+    if (!userId.value) {
+      console.error('No user ID available, unable to fetch favorites.')
+      return
+    }
+
+
+    const { data: cityData, error: fetchError } = await supabase
+      .from('locations')
+      .select('location_id, city , longitude, latitude')
+      
+
+    if (fetchError) {
+      console.error(
+        'Error fetching location from Supabase:',
+        fetchError.message,
+      )
+      return
+    }
+    Cities.value = cityData.map(city => ({
+      id: city.locations.name,
+    }))
+  } catch (err) {
+    console.error('Unexpected error while fetching favorites:', err.message);
+  } finally {
+    isLoading.value = false;
+  }
+}
+
 
 export default {
   data() {
@@ -273,6 +307,8 @@ export default {
   },
 
   mounted() {
+    this.unitsStore = useUnitsStore();  // Make sure to initialize it
+  this.unitsStore.loadUnitsFromLocalStorage();  // Load from localStorage
     Object.keys(this.cityWeather).forEach((city) => {
       this.fetchWeather(city);
       this.fetchForecast(city);

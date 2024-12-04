@@ -5,8 +5,9 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import { fetchWeather } from '@/utils/useWeather'; 
+import { useUnitsStore } from '@/stores/unit';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
@@ -20,6 +21,8 @@ const locations = ref([
 ]);
 
 const map = ref(null);
+const unitsStore = useUnitsStore(); // Initialize the store
+
 
 const updateMap = async () => {
   try {
@@ -38,30 +41,54 @@ const updateMap = async () => {
     for (const location of locations.value) {
       const weather = await fetchWeather(location.name);
 
+       // Log the original values
+       console.log(`Original Weather Data for ${location.name}:`, weather);
+
+      // Adjust temperature, wind speed, and pressure based on selected units
+      const temperature = unitsStore.tempUnit === 'C'
+        ? `${weather.temperature}°C`
+        : `${((weather.temperature * 9) / 5 + 32).toFixed(1)}°F`;
+
+      console.log(
+        `Temperature (${location.name}): Original: ${weather.temperature}°C, Converted: ${temperature}`
+      );
+
+      
+
+      const pressure = unitsStore.pressureUnit === 'hPa'
+        ? `${weather.pressure} hPa`
+        : `${(weather.pressure * 0.750062).toFixed(1)} mmHg`;
+
+      console.log(
+        `Pressure (${location.name}): Original: ${weather.pressure} hPa, Converted: ${pressure}`
+      );
+
+      const precipitation = unitsStore.precipitationUnit === 'mm'
+        ? `${weather.precipitation} mm`
+        : `${(weather.precipitation / 25.4).toFixed(2)} in`; // Convert mm to inches
+
+  
+      // Create popup content
       const popupContent = `
   <div class="location-weather" style="text-align: center; padding:10px;">
     <img src="${weather.icon}" alt="${location.name}" style="width: 50px; height: 50px;"/>
     <h5 style="font-size:15px; margin-bottom:10px;"><b>${location.name}</b></h5>
-    <span style="font-size:18px;"><strong>${weather.temperature}°C</strong></span>
-    <p>Feels like: ${weather.feelsLike}°C</p>
+    <span style="font-size:18px;"><strong>${weather.temperature}${unitsStore.tempUnit === 'C' ? '°C' : '°F'}</strong></span><br>
+    <p>Feels like: ${weather.feelsLike}°${unitsStore.tempUnit === 'C' ? '°C' : '°F'}</p>
     <p>Humidity: ${weather.humidity}%</p>
-    <p>Pressure: ${weather.pressure} hPa</p>
+    <p>Pressure: ${pressure}</p>
     <p>Wind Speed: ${weather.windSpeed} m/s</p>
     <p>Visibility: ${weather.visibility} km</p>
     <p>Cloud Coverage: ${weather.clouds}%</p>
-    <p>Precipitation: ${weather.precipitation} mm</p>
+    <p>Precipitation: ${precipitation}</p>
     <p>Sunset: ${weather.sunset}</p>
   </div>
 `;
 
-
       const marker = L.marker(location.coords).addTo(map.value).bindPopup(popupContent);
-
-      // Optionally open the popup by default (if desired)
       marker.openPopup();
     }
 
-    
     setTimeout(() => {
       map.value.invalidateSize();
     }, 0);
@@ -72,6 +99,7 @@ const updateMap = async () => {
 };
 
 onMounted(() => {
+  unitsStore.loadUnitsFromLocalStorage();
   updateMap(); 
 });
 </script>
