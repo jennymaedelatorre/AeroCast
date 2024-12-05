@@ -80,11 +80,6 @@
           </v-card>
         </v-dialog>
 
-
-
-
-
-
         <!-- City Cards (Dynamic Generation) -->
         <v-card v-for="(city, index) in items" :key="index" class="city-card text-white mt-5" :style="{
           ...activeCardStyle(city.title),
@@ -217,12 +212,10 @@ import { useUnitsStore } from '@/stores/unit';
 export default {
   data() {
     return {
-      successMessage: '', 
-      errorMessage: '',   
+      successMessage: '',
+      errorMessage: '',
       successAlert: false,
-      errorAlert: false,  
-
-
+      errorAlert: false,
       items: [],
       selectedCity: null,
       cityWeather: {},
@@ -262,9 +255,11 @@ export default {
       this.errorAlert = false;
       this.cityNotFound = false;
     },
+
     closeDeleteModal() {
       this.isDeleteModalVisible = false;
     },
+
     async fetchCitiesFromSupabase() {
       try {
         this.isLoading = true;
@@ -272,14 +267,32 @@ export default {
         const { data: { user }, error: userError } = await supabase.auth.getUser();
         if (userError || !user) throw new Error('User not authenticated');
 
-        const { data, error } = await supabase
+        // Fetch user-specific locations
+        const { data: userLocations, error: userLocationsError } = await supabase
           .from('user_locations')
           .select('location_id (city)')
           .eq('user_id', user.id);
 
-        if (error) throw new Error(`Error fetching locations: ${error.message}`);
+        if (userLocationsError) throw new Error(`Error fetching user locations: ${userLocationsError.message}`);
 
-        this.items = data.map((entry) => ({ title: entry.location_id.city }));
+        // Fetch default locations
+        const { data: defaultLocations, error: defaultLocationsError } = await supabase
+          .from('locations')
+          .select('city')
+          .eq('is_default', true); 
+
+        if (defaultLocationsError) throw new Error(`Error fetching default locations: ${defaultLocationsError.message}`);
+
+        // Combine user-specific and default locations
+        const allLocations = [
+          ...userLocations.map((entry) => ({ title: entry.location_id.city })),
+          ...defaultLocations.map((entry) => ({ title: entry.city }))
+        ];
+
+        // Remove duplicates (if any)
+        this.items = allLocations.filter(
+          (value, index, self) => self.findIndex((v) => v.title === value.title) === index
+        );
       } catch (err) {
         console.error(err.message);
         this.error = err.message;
@@ -289,29 +302,29 @@ export default {
     },
 
     async handleAddCity() {
-      if (!this.newCityName.trim()) return;  
+      if (!this.newCityName.trim()) return;
 
       try {
         const weatherData = await fetchWeather(this.newCityName);
 
-        // Check if the fetched weather data is valid
         if (!weatherData || !weatherData.temperature) {
           throw new Error('City not found');
         }
 
-        // If weather data is valid, add the city to the database
         const { data: { user }, error: userError } = await supabase.auth.getUser();
         if (userError || !user) throw new Error('User not authenticated');
 
+        // Insert city into the locations table with is_default: false
         const { data: locationData, error: locationError } = await supabase
           .from('locations')
-          .insert([{ city: this.newCityName }])
+          .insert([{ city: this.newCityName, is_default: false }]) 
           .select('id');
 
         if (locationError) throw new Error(locationError.message);
 
         const locationId = locationData[0].id;
 
+        // Link the city to the user in the user_locations table
         const { error: linkError } = await supabase
           .from('user_locations')
           .insert([{ user_id: user.id, location_id: locationId }]);
@@ -323,29 +336,25 @@ export default {
         this.newCityName = '';
         this.dialog = false;
         this.cityNotFound = false;
-        
 
-        // Show success message
         this.successMessage = 'City added successfully!';
         this.successAlert = true;
 
         setTimeout(() => {
           this.successAlert = false;
         }, 3000);
-
       } catch (err) {
         console.error(err.message);
         if (err.message === 'City not found') {
-          this.cityNotFound = true; 
+          this.cityNotFound = true;
           this.errorMessage = 'The city you entered could not be found. Please try again with a valid city name.';
           this.errorAlert = true;
 
-          // Show the error modal
           this.isModalVisible = true;
           setTimeout(() => {
             this.errorAlert = false;
             this.cityNotFound = false;
-            this.isModalVisible = false;  
+            this.isModalVisible = false;
           }, 3000);
         } else {
           this.errorMessage = err.message;
@@ -354,9 +363,6 @@ export default {
         }
       }
     },
-
-
-
 
     async deleteCity(cityName) {
       try {
@@ -384,7 +390,7 @@ export default {
         if (this.selectedCity === cityName) {
           this.selectedCity = this.items.length > 0 ? this.items[0].title : null;
         }
-        // Display success modal
+
         this.isDeleteModalVisible = true;
         this.successAlert = true;
         this.successMessage = `${cityName} has been successfully deleted!`;
@@ -393,13 +399,11 @@ export default {
           this.isDeleteModalVisible = false;
           this.successAlert = false;
         }, 3000);
-
       } catch (err) {
         console.error(err.message);
       }
     },
 
-    // Fetch weather data for a specific city
     async fetchWeather(city) {
       try {
         const weatherData = await fetchWeather(city);
@@ -412,15 +416,12 @@ export default {
         }
       } catch (error) {
         console.error(`Error fetching weather for ${city}:`, error);
-        this.cityNotFound = true;  
+        this.cityNotFound = true;
         this.errorMessage = 'The city you entered could not be found. Please try again with a valid city name.';
         this.errorAlert = true;
-
-
       }
     },
 
-    // Fetch forecast data for a specific city
     async fetchForecast(city) {
       try {
         const { hourlyForecast, threeDayForecast } = await fetchForecast(city);
