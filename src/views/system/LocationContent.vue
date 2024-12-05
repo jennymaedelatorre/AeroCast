@@ -1,7 +1,6 @@
 <template>
   <v-container fluid class="text-white mb-16" style="margin-top: -20px;">
     <v-row>
-      <!-- Left Section: Search and City Cards -->
       <v-col cols="12" lg="8">
         <!-- Search Bar -->
         <v-text-field label="Search for Cities" filled dense rounded solo flat background-color="grey lighten-3"
@@ -12,23 +11,78 @@
           Add City
         </v-btn>
 
+        <!-- Success Alert -->
+        <v-alert v-if="successAlert" type="success" dismissible class="mt-4" transition="slide-x-reverse-transition">
+          {{ successMessage }}
+        </v-alert>
+
+        <!-- Error Alert -->
+        <v-alert v-if="errorAlert" type="error" dismissible class="mt-4" transition="slide-x-reverse-transition">
+          <p>The city you entered could not be found. Please try again with a valid city name.</p>
+        </v-alert>
+
         <!-- Dialog for Adding a New City -->
         <v-dialog v-model="dialog" max-width="400px">
-          <v-card>
+          <v-card
+            style="background-color: #2a2e3b; height:500px; color:#fff; font-weight: bold; padding: 20px; border-radius: 20px; font-family: 'Times New Roman', Times, serif;">
             <v-card-title>
-              <span>Add New City</span>
+              <v-icon left color="white">mdi-map-plus</v-icon>
+              <span> Add New City</span>
             </v-card-title>
 
             <v-card-text>
+              <!-- Error Alert (only shown if city is invalid) -->
+              <v-alert v-if="cityNotFound" type="error" dismissible>
+                The city you entered could not be found. Please try again with a valid city name.
+              </v-alert>
+
               <v-text-field v-model="newCityName" label="Enter City Name" outlined dense></v-text-field>
             </v-card-text>
 
             <v-card-actions>
-              <v-btn color="primary" text @click="handleAddCity">Add</v-btn>
+              <v-btn color="white" text @click="handleAddCity">Add</v-btn>
               <v-btn color="red" text @click="dialog = false">Cancel</v-btn>
             </v-card-actions>
           </v-card>
         </v-dialog>
+
+        <!-- Modal for displaying alert when city is invalid -->
+        <v-dialog v-model="isModalVisible" max-width="400px">
+          <v-card class=""
+            style="background-color: #2a2e3b; height:500px; color:#fff; font-weight: bold; padding: 20px; border-radius: 20px; font-family: 'Times New Roman', Times, serif;">
+            <v-card-title class="error-title ">
+              <v-icon left color="red">mdi-alert-circle</v-icon>
+              Invalid City
+            </v-card-title>
+            <v-card-text>
+              <p>The city you entered could not be found. Please try again with a valid city name.</p>
+            </v-card-text>
+            <v-card-actions>
+              <v-btn color="primary" text @click="closeModal">Close</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+
+        <!-- Modal for successful city deletion -->
+        <v-dialog v-model="isDeleteModalVisible" max-width="400px">
+          <v-card
+            style="background-color: #2a2e3b; height:300px; color:#fff; font-weight: bold; padding: 20px; border-radius: 20px; font-family: 'Times New Roman', Times, serif;">
+            <v-card-title>
+              <v-icon left color="green">mdi-check-circle</v-icon>
+              City Deleted Successfully
+            </v-card-title>
+            <v-card-text>
+              <p>{{ successMessage }}</p>
+            </v-card-text>
+            <v-card-actions>
+              <v-btn color="primary" text @click="closeDeleteModal">Close</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+
+
+
+
 
 
         <!-- City Cards (Dynamic Generation) -->
@@ -41,15 +95,10 @@
           borderRadius: '30px',
           border: selectedCity === city.title ? '2px solid white' : 'none'
         }">
-          <!-- City Weather Icon and Title -->
           <v-col class="weather-icon text-left ms-5 d-flex" style="display: flex; align-items: center;">
-            <!-- Image and Condition (Vertical Stack) -->
             <div
               style="display: flex; flex-direction: column; align-items: center; padding-left: 30px; padding-top: 20px;">
-              <!-- Weather Icon -->
               <img :src="cityWeather[city.title]?.icon || 'default-icon.png'" alt="" width="120" />
-
-              <!-- Weather Condition Below the Icon -->
               <p v-if="!cityWeather[city.title]?.condition"
                 style="color: lightgray; font-size: 14px; margin-top: 10px;">
                 Loading weather condition...
@@ -58,15 +107,12 @@
                 {{ cityWeather[city.title]?.condition }}
               </p>
             </div>
-
-            <!-- City Title and Description Beside Image -->
             <div class="ms-8" style="flex: 1;">
               <h2>{{ city.title }}</h2>
               <p>{{ city.description }}</p>
             </div>
           </v-col>
 
-          <!-- Temperature and Actions -->
           <v-col class="text-right" style="margin-right: 30px;">
             <h2 class="temperature mb-3" style="font-size: 50px;">
               {{ cityWeather[city.title]?.temperature || 'loading...' }}°C
@@ -84,7 +130,6 @@
 
       <!-- Right Section: Selected City Details -->
       <v-col cols="12" lg="4">
-        <!-- Selected City Weather -->
         <v-card class="weather mx-auto mt-4" elevation="0" style="border: none;" v-if="selectedCity">
           <v-card-item :title="selectedCity">
             <template v-slot:subtitle>
@@ -172,6 +217,12 @@ import { useUnitsStore } from '@/stores/unit';
 export default {
   data() {
     return {
+      successMessage: '', 
+      errorMessage: '',   
+      successAlert: false,
+      errorAlert: false,  
+
+
       items: [],
       selectedCity: null,
       cityWeather: {},
@@ -181,6 +232,9 @@ export default {
       error: null,
       dialog: false,
       newCityName: '',
+      cityNotFound: false,
+      isModalVisible: false,
+      isDeleteModalVisible: false,
     };
   },
 
@@ -203,85 +257,145 @@ export default {
   },
 
   methods: {
-    // Fetch cities from the Supabase database
+    closeModal() {
+      this.isModalVisible = false;
+      this.errorAlert = false;
+      this.cityNotFound = false;
+    },
+    closeDeleteModal() {
+      this.isDeleteModalVisible = false;
+    },
     async fetchCitiesFromSupabase() {
       try {
         this.isLoading = true;
 
-        // Fetch cities from the 'locations' table
-        const { data: cityData, error } = await supabase
-          .from('locations')
-          .select('city');
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        if (userError || !user) throw new Error('User not authenticated');
 
-        if (error) {
-          throw new Error(`Error fetching locations: ${error.message}`);
-        }
+        const { data, error } = await supabase
+          .from('user_locations')
+          .select('location_id (city)')
+          .eq('user_id', user.id);
 
+        if (error) throw new Error(`Error fetching locations: ${error.message}`);
 
-        this.items = cityData.map((city) => ({ title: city.city }));
+        this.items = data.map((entry) => ({ title: entry.location_id.city }));
       } catch (err) {
-        console.error('Unexpected error while fetching cities from Supabase:', err.message);
+        console.error(err.message);
         this.error = err.message;
       } finally {
         this.isLoading = false;
       }
     },
 
-    // Add a new city
     async handleAddCity() {
-      if (!this.newCityName.trim()) {
-        console.error('City name is required.');
-        return;
-      }
+      if (!this.newCityName.trim()) return;  
 
       try {
-        // Add new city to Supabase
-        const { data, error } = await supabase.from('locations').insert([{ city: this.newCityName }]);
+        const weatherData = await fetchWeather(this.newCityName);
 
-        if (error) {
-          throw new Error(`Failed to add city: ${error.message}`);
+        // Check if the fetched weather data is valid
+        if (!weatherData || !weatherData.temperature) {
+          throw new Error('City not found');
         }
 
-        // Add the new city to items and fetch its weather data
+        // If weather data is valid, add the city to the database
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        if (userError || !user) throw new Error('User not authenticated');
+
+        const { data: locationData, error: locationError } = await supabase
+          .from('locations')
+          .insert([{ city: this.newCityName }])
+          .select('id');
+
+        if (locationError) throw new Error(locationError.message);
+
+        const locationId = locationData[0].id;
+
+        const { error: linkError } = await supabase
+          .from('user_locations')
+          .insert([{ user_id: user.id, location_id: locationId }]);
+
+        if (linkError) throw new Error(linkError.message);
+
         this.items.push({ title: this.newCityName });
-        this.cityWeather[this.newCityName] = { temperature: null, condition: '', icon: '', description: '' };
-        await this.fetchWeather(this.newCityName);
-        await this.fetchForecast(this.newCityName);
-
-        console.log(`City "${this.newCityName}" added successfully.`);
-        console.log(`Weather for "${this.newCityName}":`, this.cityWeather[this.newCityName]);
-
-        // Reset input and close dialog
+        this.cityWeather[this.newCityName] = weatherData;
         this.newCityName = '';
         this.dialog = false;
+        this.cityNotFound = false;
+        
+
+        // Show success message
+        this.successMessage = 'City added successfully!';
+        this.successAlert = true;
+
+        setTimeout(() => {
+          this.successAlert = false;
+        }, 3000);
+
       } catch (err) {
-        console.error('Error adding city:', err.message);
+        console.error(err.message);
+        if (err.message === 'City not found') {
+          this.cityNotFound = true; 
+          this.errorMessage = 'The city you entered could not be found. Please try again with a valid city name.';
+          this.errorAlert = true;
+
+          // Show the error modal
+          this.isModalVisible = true;
+          setTimeout(() => {
+            this.errorAlert = false;
+            this.cityNotFound = false;
+            this.isModalVisible = false;  
+          }, 3000);
+        } else {
+          this.errorMessage = err.message;
+          this.errorAlert = true;
+          this.isModalVisible = true;
+        }
       }
     },
 
-    // Delete an existing city
+
+
+
     async deleteCity(cityName) {
       try {
-        // Delete city from Supabase
-        const { data, error } = await supabase.from('locations').delete().eq('city', cityName);
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        if (userError || !user) throw new Error('User not authenticated');
 
-        if (error) {
-          throw new Error(`Error deleting city: ${error.message}`);
-        }
+        const { data: locationData, error: locationError } = await supabase
+          .from('locations')
+          .select('id')
+          .eq('city', cityName);
 
-        // Remove city from items array and cityWeather object
+        if (locationError || locationData.length === 0) throw new Error('City not found');
+
+        const locationId = locationData[0].id;
+
+        const { error: deleteError } = await supabase
+          .from('user_locations')
+          .delete()
+          .match({ user_id: user.id, location_id: locationId });
+
+        if (deleteError) throw new Error(deleteError.message);
+
         this.items = this.items.filter((city) => city.title !== cityName);
         delete this.cityWeather[cityName];
-
-        // Reset selected city if the deleted city was selected
         if (this.selectedCity === cityName) {
           this.selectedCity = this.items.length > 0 ? this.items[0].title : null;
         }
+        // Display success modal
+        this.isDeleteModalVisible = true;
+        this.successAlert = true;
+        this.successMessage = `${cityName} has been successfully deleted!`;
 
-        console.log(`City "${cityName}" deleted successfully.`);
+        setTimeout(() => {
+          this.isDeleteModalVisible = false;
+          this.successAlert = false;
+        }, 3000);
+
       } catch (err) {
-        console.error('Unexpected error while deleting city:', err.message);
-        this.error = err.message;
+        console.error(err.message);
       }
     },
 
@@ -289,12 +403,20 @@ export default {
     async fetchWeather(city) {
       try {
         const weatherData = await fetchWeather(city);
+        if (!weatherData || !weatherData.temperature) {
+          throw new Error(`Weather data for ${city} not found`);
+        }
         this.cityWeather[city] = weatherData;
         if (!this.selectedCity) {
           this.selectedCity = city;
         }
       } catch (error) {
         console.error(`Error fetching weather for ${city}:`, error);
+        this.cityNotFound = true;  
+        this.errorMessage = 'The city you entered could not be found. Please try again with a valid city name.';
+        this.errorAlert = true;
+
+
       }
     },
 
@@ -309,13 +431,11 @@ export default {
       }
     },
 
-
     onSeeMoreClick(city) {
       this.selectedCity = city;
       this.fetchWeather(city);
       this.fetchForecast(city);
     },
-
 
     activeCardStyle(city) {
       return {
@@ -325,7 +445,6 @@ export default {
   },
 };
 </script>
-
 
 
 <style scoped>
@@ -382,6 +501,10 @@ export default {
 }
 
 @media (max-width: 600px) {
+  .ms-8 h2 {
+    margin-left: -10px;
+  }
+
   .city-card {
     height: 150px !important;
     padding: 10px;
