@@ -88,7 +88,7 @@
           justifyContent: 'center',
           alignItems: 'center',
           borderRadius: '30px',
-          border: selectedCity === city.title ? '2px solid white' : 'none'
+          border: city.isDefault ? '3px solid gold' : selectedCity === city.title ? '2px solid white' : 'none'
         }">
           <v-col class="weather-icon text-left ms-5 d-flex" style="display: flex; align-items: center;">
             <div
@@ -112,7 +112,7 @@
             <h2 class="temperature mb-3" style="font-size: 50px;">
               {{ cityWeather[city.title]?.temperature || 'loading...' }}°C
             </h2>
-            <v-btn color="primary" rounded @click="onSeeMoreClick(city.title)" class="see-more">
+            <v-btn color="primary" rounded @click="setDefaultCity(city.title)" class="see-more">
               <h4 style="font-size: 11px;">Set default</h4>
             </v-btn>
             <v-btn color="red" rounded @click="deleteCity(city.title)" class="delete-city" style="margin-left: 10px;">
@@ -210,6 +210,7 @@ import { fetchWeather, fetchForecast } from '@/utils/useWeather';
 import { useUnitsStore } from '@/stores/unit';
 
 export default {
+    name: 'LocationContent',
   data() {
     return {
       successMessage: '',
@@ -237,6 +238,7 @@ export default {
 
     // Fetch cities from Supabase
     await this.fetchCitiesFromSupabase();
+    await this.fetchDefaultCity();
 
     // Fetch weather data for each city
     this.items.forEach((city) => {
@@ -403,6 +405,86 @@ export default {
         console.error(err.message);
       }
     },
+
+    async setDefaultCity(cityName) {
+  try {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) throw new Error('User not authenticated');
+
+    const { data: locationData, error: locationError } = await supabase
+      .from('locations')
+      .select('id')
+      .eq('city', cityName)
+      .single();
+
+    if (locationError || !locationData) throw new Error('City not found');
+
+    const locationId = locationData.id;
+
+    // Remove existing default
+    const { error: resetError } = await supabase
+      .from('user_locations')
+      .update({ is_default: false })
+      .eq('user_id', user.id)
+      .eq('is_default', true);
+
+    if (resetError) throw new Error('Failed to reset existing default city');
+
+    // Set the new default city
+    const { error: setDefaultError } = await supabase
+      .from('user_locations')
+      .update({ is_default: true })
+      .match({ user_id: user.id, location_id: locationId });
+
+    if (setDefaultError) throw new Error('Failed to set default city');
+
+    this.selectedCity = cityName; // Update the local state
+    this.successMessage = `${cityName} has been set as your default city!`;
+    this.successAlert = true;
+
+    setTimeout(() => {
+      this.successAlert = false;
+    }, 3000);
+  } catch (err) {
+    console.error(err.message);
+    this.errorAlert = true;
+    this.errorMessage = err.message;
+    setTimeout(() => {
+      this.errorAlert = false;
+    }, 3000);
+  }
+},
+
+
+async fetchDefaultCity() {
+  try {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) throw new Error('User not authenticated');
+
+    // Query the user's default city
+    const { data: defaultCity, error: defaultCityError } = await supabase
+      .from('user_locations')
+      .select('location_id (city)')
+      .eq('user_id', user.id)
+      .eq('is_default', true)
+      .single();
+
+    if (defaultCityError || !defaultCity) {
+      console.warn('No default city found, selecting the first available city.');
+      if (this.items.length > 0) this.selectedCity = this.items[0].title;
+      return;
+    }
+
+    // Set the default city
+    this.selectedCity = defaultCity.location_id.city;
+    this.fetchWeather(this.selectedCity);
+    this.fetchForecast(this.selectedCity);
+  } catch (error) {
+    console.error('Error fetching default city:', error);
+  }
+},
+
+
 
     async fetchWeather(city) {
       try {
