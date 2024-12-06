@@ -4,7 +4,7 @@
       <v-col cols="12" lg="8">
         <v-container>
           <v-card class="weather mx-auto mt-4" elevation="0" style="border: none;">
-            <v-card-item title="Butuan City">
+            <v-card-item :title="defaultCity">
               <template v-slot:subtitle>
                 <span class="desc" style="font-size: 15.5px;">
                   {{ currentWeather.condition }}
@@ -141,9 +141,10 @@
                       <v-icon class="mr-1" size="28">mdi-thermometer</v-icon>
                       <span style="color: gray; font-size: 15px;">Feels like</span>
                     </div>
-                    <strong class="temperature-value" style="font-size: 20px;">{{ currentWeather.feelsLike }}°{{ formattedTemperature }}
-                        <span v-if="unitsStore.tempUnit === 'C'">C</span>
-                        <span v-if="unitsStore.tempUnit === 'F'">F</span></strong>
+                    <strong class="temperature-value" style="font-size: 20px;">{{ currentWeather.feelsLike }}°{{
+                      formattedTemperature }}
+                      <span v-if="unitsStore.tempUnit === 'C'">C</span>
+                      <span v-if="unitsStore.tempUnit === 'F'">F</span></strong>
                   </div>
 
                   <div class="d-flex flex-column mt-4">
@@ -177,8 +178,10 @@
                       <v-icon class="mr-2" size="28">mdi-speedometer</v-icon>
                       <span style="color: gray; font-size: 15px;">Air Pressure</span>
                     </div>
-                    <strong class="temperature-value" style="font-size: 20px;">{{ currentWeather.pressure }}{{ setPressureUnit }}
-                      </strong>
+                    <strong class="temperature-value" style="font-size: 20px;">{{ currentWeather.pressure }}{{
+                      setPressureUnit
+                      }}
+                    </strong>
                   </div>
 
                   <div class="d-flex1 flex-column mt-4">
@@ -266,8 +269,8 @@
                       <span style="color: gray">{{ day.date }}</span>
                       <img :src="day.icon" alt="Weather Icon" style="width: 40px; height: 40px; margin-right: 8px;" />
                       <span class="ml" style="font-size: 20px;"><strong>{{ day.temperature }}°{{ formattedTemperature }}
-                        <span v-if="unitsStore.tempUnit === 'C'">C</span>
-                        <span v-if="unitsStore.tempUnit === 'F'">F</span></strong></span>
+                          <span v-if="unitsStore.tempUnit === 'C'">C</span>
+                          <span v-if="unitsStore.tempUnit === 'F'">F</span></strong></span>
                     </div>
                   </v-list-item-title>
                 </v-list-item-content>
@@ -354,7 +357,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount,computed } from 'vue';
+import supabase from '@/utils/supabase';
+import { ref, onMounted, onBeforeUnmount, computed } from 'vue';
 import { fetchWeather, fetchForecast } from '@/utils/useWeather';
 import { useUnitsStore } from '@/stores/unit';
 
@@ -362,21 +366,21 @@ import { useUnitsStore } from '@/stores/unit';
 const currentQuote = ref('');
 const currentAuthor = ref('');
 const currentQuoteImage = ref('');
-let quoteTimer = null; 
+let quoteTimer = null;
 let index = 0;
 
-const currentWeather = ref({});
+const currentWeather = ref({ condition: 'Loading weather...' });
 const hourlyForecast = ref([]);
 const airQuality = ref({ status: 'Good', pm25: 15 });
 const activitySuggestions = ref([]);
 
-const unitsStore = useUnitsStore(); // Initialize the store
+const unitsStore = useUnitsStore();
 
 onMounted(() => {
-  unitsStore.loadUnitsFromLocalStorage(); // Load units from localStorage
-  loadWeatherData(); // Load weather data
-  updateQuote(); // Set the quote
-  quoteTimer = setInterval(updateQuote, 3000); // Change the quote every 3 seconds
+  unitsStore.loadUnitsFromLocalStorage();
+  loadWeatherData();
+  updateQuote();
+  quoteTimer = setInterval(updateQuote, 5000);
 });
 
 const temperatureDisplay = computed(() => {
@@ -409,27 +413,66 @@ const weather = ref({
 });
 
 const fiveDayForecast = ref([]);
-const city = 'Butuan City';
+const defaultCity = ref('');
+
+
+// default city
+const fetchDefaultCityFromSupabase = async () => {
+  try {
+
+    const { data, error } = await supabase
+      .from('user_locations')
+      .select('location_id')
+      .eq('is_default', true)
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    // Fetch city name from locations table
+    if (data?.location_id) {
+      const { data: locationData, error: locationError } = await supabase
+        .from('locations')
+        .select('city')
+        .eq('id', data.location_id)
+        .single();
+
+      if (locationError) {
+        throw locationError;
+      }
+
+      return locationData?.city || 'Butuan City';
+    }
+
+    return 'Butuan City';
+  } catch (err) {
+    console.error('Error fetching default city from Supabase:', err);
+    return 'Butuan city'; // Fallback city
+  }
+};
+
 
 // Function to load weather and air quality data
 const loadWeatherData = async () => {
   try {
-    console.log(`Fetching weather data for: ${city}`);
+    console.log(`Fetching weather data for: ${defaultCity.value}`);
 
     // Fetch current weather
-    const weatherData = await fetchWeather(city);
+    const weatherData = await fetchWeather(defaultCity.value);
     currentWeather.value = weatherData;
 
+
     // Fetch forecast data
-    const forecast = await fetchForecast(city);
+    const forecast = await fetchForecast(defaultCity.value);
     hourlyForecast.value = forecast.hourlyForecast;
     fiveDayForecast.value = forecast.fiveDayForecast;
 
-    
-    airQuality.value.pm25 = weatherData.pm25 || 15; 
+
+    airQuality.value.pm25 = weatherData.pm25 || 15;
     airQuality.value.status = determineAirQualityStatus(airQuality.value.pm25);
 
-    
+
     console.log('Air Quality:', airQuality.value);
 
     console.log('Current Weather:', currentWeather.value);
@@ -474,28 +517,28 @@ const loadActivitiesBasedOnWeather = () => {
       { title: 'Bike Ride', description: 'Go for a refreshing bike ride to nearby attractions.', color: '#4CAF50', icon: '/imgs/bike.png' },
       { title: 'Photography Walk', description: 'Capture the beauty of a sunny day with your camera.', color: '#FFC107', icon: '/imgs/photograph.png' },
     ];
-  } 
+  }
   // Rain-related conditions (rain, drizzle, overcast, etc.)
   else if (
-    condition.includes('rain') || 
-    condition.includes('drizzle') || 
-    condition.includes('showers') || 
-    condition.includes('overcast') || 
+    condition.includes('rain') ||
+    condition.includes('drizzle') ||
+    condition.includes('showers') ||
+    condition.includes('overcast') ||
     condition.includes('cloud')
   ) {
     activitySuggestions.value = [
       { title: 'Carry an Umbrella', description: 'Be prepared for the rain by bringing an umbrella.', color: '#2196F3', icon: '/imgs/umbrellaa.png' },
-      { title: 'Drink Coffee', description: 'Warm yourself up with a comforting cup of coffee.', color: '#795548',icon: '/imgs/coffee.png' },
+      { title: 'Drink Coffee', description: 'Warm yourself up with a comforting cup of coffee.', color: '#795548', icon: '/imgs/coffee.png' },
       { title: 'Watch a Movie', description: 'Enjoy a cozy indoor movie marathon.', color: '#607D8B', icon: '/imgs/movie.png' },
       { title: 'Bake Some Treats', description: 'Try baking cookies or a cake at home.', color: '#FF5722', icon: '/imgs/bake.png' },
       { title: 'Indoor Gardening', description: 'Spruce up your indoor space with some plants.', color: '#8BC34A', icon: '/imgs/gardening.png' },
       { title: 'Play Board Games', description: 'Have fun playing classic board games with family.', color: '#3F51B5', icon: '/imgs/games.png' },
     ];
-  } 
+  }
   // Storm-related conditions (thunderstorm, lightning, etc.)
   else if (
-    condition.includes('storm') || 
-    condition.includes('thunder') || 
+    condition.includes('storm') ||
+    condition.includes('thunder') ||
     condition.includes('lightning')
   ) {
     activitySuggestions.value = [
@@ -505,7 +548,7 @@ const loadActivitiesBasedOnWeather = () => {
       { title: 'Prepare an Emergency Kit', description: 'Keep essentials like water, flashlights, and first aid ready.', color: '#4CAF50', icon: '/imgs/emergency.png' },
       { title: 'Backup Power Sources', description: 'Charge all devices and keep portable power banks ready.', color: '#9E9E9E', icon: '/imgs/charge.png' },
     ];
-  } 
+  }
   // Snow-related conditions
   else if (condition.includes('snow') || condition.includes('sleet')) {
     activitySuggestions.value = [
@@ -514,7 +557,7 @@ const loadActivitiesBasedOnWeather = () => {
       { title: 'Snowball Fight', description: 'Enjoy a playful snowball fight outdoors.', color: '#3F51B5', icon: '/imgs/snowball.png' },
       { title: 'Winter Photography', description: 'Capture stunning photos of snow-covered scenery.', color: '#E91E63', icon: '/imgs/photograph.png' },
     ];
-  } 
+  }
   // Default (foggy, mist, hazy, or unclassified weather)
   else {
     activitySuggestions.value = [
@@ -558,19 +601,19 @@ const updateQuote = () => {
   index = (index + 1) % quotes.value.length;
 };
 
-// Lifecycle hooks
-onMounted(() => {
+onMounted(async () => {
+  defaultCity.value = await fetchDefaultCityFromSupabase(); // Fetch the default city
+  console.log(`Fetched default city: ${defaultCity.value}`);
   loadWeatherData();
   updateQuote();
-  quoteTimer = setInterval(updateQuote, 3000); 
+  quoteTimer = setInterval(updateQuote, 5000);
 });
+
 
 onBeforeUnmount(() => {
-  clearInterval(quoteTimer); 
+  clearInterval(quoteTimer);
 });
 </script>
-
-
 
 
 
@@ -579,31 +622,39 @@ onBeforeUnmount(() => {
   .temp-font {
     font-size: 55px !important;
   }
-  .desc{
+
+  .desc {
     font-size: 11.5px;
   }
-  .temperature-value{
+
+  .temperature-value {
     font-size: 18px !important
   }
-  .weather-icon img{
+
+  .weather-icon img {
     width: 148px !important;
     height: auto !important;
   }
-  .d-flex{
+
+  .d-flex {
     margin-left: 0 !important;
   }
-  .d-flex1{
+
+  .d-flex1 {
     margin-left: 0 !important;
   }
+
   blockquote {
-  margin-top: 10px;
-  font-size: 1.1rem !important;
+    margin-top: 10px;
+    font-size: 1.1rem !important;
   }
 }
-.forecast-item-btn{
-  color:white;
+
+.forecast-item-btn {
+  color: white;
   margin-left: 10px;
 }
+
 .weather-detail-item {
   margin: 10px 0;
   font-size: 16px;
@@ -703,13 +754,14 @@ onBeforeUnmount(() => {
   transition: left 0.5s ease;
   z-index: 20;
 }
-.d-flex{
-    margin-left: 10px;
-  }
 
-.d-flex1{
-    margin-left: 80px;
-  }
+.d-flex {
+  margin-left: 10px;
+}
+
+.d-flex1 {
+  margin-left: 80px;
+}
 
 .details {
   display: flex;

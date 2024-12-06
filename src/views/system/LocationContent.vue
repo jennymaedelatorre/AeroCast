@@ -3,8 +3,9 @@
     <v-row>
       <v-col cols="12" lg="8">
         <!-- Search Bar -->
-        <v-text-field v-model="searchQuery" label="Search for Cities" filled dense rounded solo flat background-color="grey lighten-3"
-          append-inner-icon="mdi-magnify" @click:append="onSearchClick"></v-text-field>
+        <v-text-field v-model="searchQuery" label="Search for Cities" filled dense rounded solo flat
+          background-color="grey lighten-3" append-inner-icon="mdi-magnify"
+          @click:append="onSearchClick"></v-text-field>
 
         <!-- Add City Button and Dialog -->
         <v-btn color="primary" class="add-city mb-5" @click="dialog = true">
@@ -81,28 +82,24 @@
         </v-dialog>
 
         <!-- City Cards (Dynamic Generation) -->
-        <v-card v-for="(city, index) in items" :key="index" class="city-card text-white mt-5" :style="{
+        <v-card v-for="(city, index) in filteredItems" :key="index" class="city-card text-white mt-5" :style="{
           ...activeCardStyle(city.title),
           height: '250px',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
           borderRadius: '30px',
-          border: city.isDefault ? '3px solid gold' : selectedCity === city.title ? '2px solid white' : 'none'
+          border: city.isDefault ? '3px solid gold' : selectedCity === city.title ? '2px solid white' : 'none',
         }">
           <v-col class="weather-icon text-left ms-5 d-flex" style="display: flex; align-items: center;">
-            <div style="display: flex; flex-direction: column; align-items: center; padding-left: 30px; padding-top: 20px;">
+            <div
+              style="display: flex; flex-direction: column; align-items: center; padding-left: 30px; padding-top: 20px;">
               <img :src="cityWeather[city.title]?.icon || 'default-icon.png'" alt="" width="120" />
-              <p
-                v-if="!cityWeather[city.title]?.condition"
-                style="color: lightgray; font-size: 14px; margin-top: 10px;"
-              >
+              <p v-if="!cityWeather[city.title]?.condition"
+                style="color: lightgray; font-size: 14px; margin-top: 10px;">
                 Loading weather condition...
               </p>
-              <p
-                v-else
-                style="color: lightgray; font-size: 14px; margin-top: 10px;"
-              >
+              <p v-else style="color: lightgray; font-size: 14px; margin-top: 10px;">
                 {{ cityWeather[city.title]?.condition }}
               </p>
             </div>
@@ -215,7 +212,6 @@ import { fetchWeather, fetchForecast } from '@/utils/useWeather';
 import { useUnitsStore } from '@/stores/unit';
 
 export default {
-    name: 'LocationContent',
   data() {
     return {
       successMessage: '',
@@ -234,13 +230,13 @@ export default {
       cityNotFound: false,
       isModalVisible: false,
       isDeleteModalVisible: false,
-      searchQuery:'',
+      searchQuery: '',
     };
   },
   computed: {
-    filteredItems(){
+    filteredItems() {
       if (!this.searchQuery.trim()) {
-        return this.items; // Show all cities if search query is empty
+        return this.items;
       }
 
       const query = this.searchQuery.toLowerCase();
@@ -298,7 +294,7 @@ export default {
         const { data: defaultLocations, error: defaultLocationsError } = await supabase
           .from('locations')
           .select('city')
-          .eq('is_default', true); 
+          .eq('is_default', true);
 
         if (defaultLocationsError) throw new Error(`Error fetching default locations: ${defaultLocationsError.message}`);
 
@@ -336,14 +332,14 @@ export default {
         // Insert city into the locations table with is_default: false
         const { data: locationData, error: locationError } = await supabase
           .from('locations')
-          .insert([{ city: this.newCityName, is_default: false }]) 
+          .insert([{ city: this.newCityName, is_default: false }])
           .select('id');
 
         if (locationError) throw new Error(locationError.message);
 
         const locationId = locationData[0].id;
 
-        // Link the city to the user in the user_locations table
+
         const { error: linkError } = await supabase
           .from('user_locations')
           .insert([{ user_id: user.id, location_id: locationId }]);
@@ -424,84 +420,90 @@ export default {
     },
 
     async setDefaultCity(cityName) {
-  try {
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError || !user) throw new Error('User not authenticated');
-
-    const { data: locationData, error: locationError } = await supabase
-      .from('locations')
-      .select('id')
-      .eq('city', cityName)
-      .single();
-
-    if (locationError || !locationData) throw new Error('City not found');
-
-    const locationId = locationData.id;
-
-    // Remove existing default
-    const { error: resetError } = await supabase
-      .from('user_locations')
-      .update({ is_default: false })
-      .eq('user_id', user.id)
-      .eq('is_default', true);
-
-    if (resetError) throw new Error('Failed to reset existing default city');
-
-    // Set the new default city
-    const { error: setDefaultError } = await supabase
-      .from('user_locations')
-      .update({ is_default: true })
-      .match({ user_id: user.id, location_id: locationId });
-
-    if (setDefaultError) throw new Error('Failed to set default city');
-
-    this.selectedCity = cityName; // Update the local state
-    this.successMessage = `${cityName} has been set as your default city!`;
-    this.successAlert = true;
-
-    setTimeout(() => {
-      this.successAlert = false;
-    }, 3000);
-  } catch (err) {
-    console.error(err.message);
-    this.errorAlert = true;
-    this.errorMessage = err.message;
-    setTimeout(() => {
-      this.errorAlert = false;
-    }, 3000);
-  }
-},
+      try {
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        if (userError || !user) throw new Error('User not authenticated');
 
 
-async fetchDefaultCity() {
-  try {
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError || !user) throw new Error('User not authenticated');
+        const { data: locationData, error: locationError } = await supabase
+          .from('locations')
+          .select('id')
+          .eq('city', cityName)
+          .single();
 
-    // Query the user's default city
-    const { data: defaultCity, error: defaultCityError } = await supabase
-      .from('user_locations')
-      .select('location_id (city)')
-      .eq('user_id', user.id)
-      .eq('is_default', true)
-      .single();
+        if (locationError || !locationData) throw new Error('City not found');
 
-    if (defaultCityError || !defaultCity) {
-      console.warn('No default city found, selecting the first available city.');
-      if (this.items.length > 0) this.selectedCity = this.items[0].title;
-      return;
-    }
+        const locationId = locationData.id;
 
-    // Set the default city
-    this.selectedCity = defaultCity.location_id.city;
-    this.fetchWeather(this.selectedCity);
-    this.fetchForecast(this.selectedCity);
-  } catch (error) {
-    console.error('Error fetching default city:', error);
-  }
-},
+        // Step 2: Remove any existing default for the user
+        const { error: resetError } = await supabase
+          .from('user_locations')
+          .update({ is_default: false })
+          .eq('user_id', user.id)
+          .eq('is_default', true);
+
+        if (resetError) throw new Error('Failed to reset existing default city');
 
 
+        const { error: setDefaultError } = await supabase
+          .from('user_locations')
+          .update({ is_default: true })
+          .match({ user_id: user.id, location_id: locationId });
+
+        if (setDefaultError) throw new Error('Failed to set default city');
+
+
+        this.successAlert = true;
+        this.successMessage = `${cityName} has been set as your default city!`;
+        setTimeout(() => {
+          this.successAlert = false;
+        }, 3000);
+
+
+        this.selectedCity = cityName;
+      } catch (err) {
+        console.error(err.message);
+        this.errorAlert = true;
+        this.errorMessage = err.message;
+        setTimeout(() => {
+          this.errorAlert = false;
+        }, 3000);
+      }
+    },
+
+    async fetchDefaultCity() {
+      try {
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        if (userError || !user) throw new Error('User not authenticated');
+
+        const { data: defaultCity, error: defaultCityError } = await supabase
+          .from('user_locations')
+          .select('location_id (city)')
+          .eq('user_id', user.id)
+          .eq('is_default', true)
+          .single();
+
+        if (defaultCityError || !defaultCity) {
+          console.warn('No default city found, checking local storage.');
+          const savedCity = localStorage.getItem('selectedCity');
+          if (savedCity) {
+            this.selectedCity = savedCity;
+            this.fetchWeather(this.selectedCity);
+            this.fetchForecast(this.selectedCity);
+            return;
+          }
+          console.warn('No saved city in local storage, selecting first available city.');
+          if (this.items.length > 0) this.selectedCity = this.items[0].title;
+          return;
+        }
+
+        this.selectedCity = defaultCity.location_id.city;
+        this.fetchWeather(this.selectedCity);
+        this.fetchForecast(this.selectedCity);
+      } catch (error) {
+        console.error('Error fetching default city:', error);
+      }
+    },
 
     async fetchWeather(city) {
       try {
