@@ -3,7 +3,7 @@
     <v-row>
       <v-col cols="12" lg="8">
         <!-- Search Bar -->
-        <v-text-field label="Search for Cities" filled dense rounded solo flat background-color="grey lighten-3"
+        <v-text-field v-model="searchQuery" label="Search for Cities" filled dense rounded solo flat background-color="grey lighten-3"
           append-inner-icon="mdi-magnify" @click:append="onSearchClick"></v-text-field>
 
         <!-- Add City Button and Dialog -->
@@ -91,14 +91,18 @@
           border: city.isDefault ? '3px solid gold' : selectedCity === city.title ? '2px solid white' : 'none'
         }">
           <v-col class="weather-icon text-left ms-5 d-flex" style="display: flex; align-items: center;">
-            <div
-              style="display: flex; flex-direction: column; align-items: center; padding-left: 30px; padding-top: 20px;">
+            <div style="display: flex; flex-direction: column; align-items: center; padding-left: 30px; padding-top: 20px;">
               <img :src="cityWeather[city.title]?.icon || 'default-icon.png'" alt="" width="120" />
-              <p v-if="!cityWeather[city.title]?.condition"
-                style="color: lightgray; font-size: 14px; margin-top: 10px;">
+              <p
+                v-if="!cityWeather[city.title]?.condition"
+                style="color: lightgray; font-size: 14px; margin-top: 10px;"
+              >
                 Loading weather condition...
               </p>
-              <p v-else style="color: lightgray; font-size: 14px; margin-top: 10px;">
+              <p
+                v-else
+                style="color: lightgray; font-size: 14px; margin-top: 10px;"
+              >
                 {{ cityWeather[city.title]?.condition }}
               </p>
             </div>
@@ -120,6 +124,7 @@
             </v-btn>
           </v-col>
         </v-card>
+
 
       </v-col>
 
@@ -229,8 +234,20 @@ export default {
       cityNotFound: false,
       isModalVisible: false,
       isDeleteModalVisible: false,
+      searchQuery:'',
     };
   },
+  computed: {
+    filteredItems(){
+      if (!this.searchQuery.trim()) {
+        return this.items; // Show all cities if search query is empty
+      }
+
+      const query = this.searchQuery.toLowerCase();
+      return this.items.filter(city => city.title.toLowerCase().startsWith(query));
+    },
+  },
+
 
   async mounted() {
     this.unitsStore = useUnitsStore();
