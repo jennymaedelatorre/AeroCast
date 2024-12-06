@@ -34,9 +34,9 @@
           </v-list-item>
         </router-link>
 
-        <router-link to="/dashboard/calendar" class="spaced-list-item" style="text-decoration: none; color: inherit;" active-class="active-link">
+        <router-link to="/dashboard/about" class="spaced-list-item" style="text-decoration: none; color: inherit;" active-class="active-link">
           <v-list-item prepend-icon="mdi-calendar-month">
-            <v-list-item-title>Calendar</v-list-item-title>
+            <v-list-item-title>About</v-list-item-title>
           </v-list-item>
         </router-link>
 

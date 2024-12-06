@@ -4,7 +4,7 @@ import LoginView from '@/views/auth/LoginView.vue';
 import HomeContent from '@/views/system/HomeContent.vue';
 import MapContent from '@/views/system/MapContent.vue';
 import LocationContent from '@/views/system/LocationContent.vue';
-import CalendarContent from '@/views/system/CalendarContent.vue';
+import AboutContent from '@/views/system/AboutContent.vue';
 import SettingContent from '@/views/system/SettingContent.vue';
 import DashboardView from '@/views/system/DashboardView.vue';
 import { isAuthenticated } from '@/utils/supabase';
@@ -49,9 +49,9 @@ const router = createRouter({
           component: LocationContent,
         },
         {
-          path: 'calendar',
-          name: 'calendar',
-          component: CalendarContent,
+          path: 'about',
+          name: 'about',
+          component: AboutContent,
         },
         {
           path: 'settings',

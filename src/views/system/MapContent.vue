@@ -5,24 +5,50 @@
 </template>
 
 <script setup>
-import { onMounted, ref, computed } from 'vue';
-import { fetchWeather } from '@/utils/useWeather'; 
+import { onMounted, ref } from 'vue';
+import { fetchWeather } from '@/utils/useWeather';
 import { useUnitsStore } from '@/stores/unit';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import supabase from '@/utils/supabase';
+import axios from 'axios';
 
-// Define the list of locations
-const locations = ref([
-  { name: 'Manila', coords: [14.5995, 120.9842] },
-  { name: 'Butuan City', coords: [8.9475, 125.5406] },
-  { name: 'Cebu City', coords: [10.3157, 123.8854] },
-  { name: 'Cagayan de Oro City', coords: [8.4542, 124.6319] },
-  { name: 'Baguio City', coords: [16.4023, 120.5969] },
-]);
-
+const locations = ref([]);
 const map = ref(null);
-const unitsStore = useUnitsStore(); // Initialize the store
+const unitsStore = useUnitsStore();
 
+// Function to fetch the coordinates using Nominatim API
+const geocodeCity = async (city) => {
+  if (!city || city.trim() === '') {
+    console.error("City name is empty.");
+    return null;
+  }
+
+  try {
+    const response = await axios.get('https://nominatim.openstreetmap.org/search', {
+      params: {
+        q: city,
+        format: 'json',
+        addressdetails: 1,
+        limit: 1
+      },
+      headers: {
+        'User-Agent': 'YourAppName/1.0 (contact@yourdomain.com)'
+      }
+    });
+
+    if (response.data.length > 0) {
+      const { lat, lon } = response.data[0];
+      return { lat, lon };
+    } else {
+      console.error(`City not found: ${city}`);
+      return null;
+    }
+  } catch (error) {
+    console.error('Error geocoding city:', error);
+    return null;
+  }
+};
 
 const updateMap = async () => {
   try {
@@ -37,57 +63,48 @@ const updateMap = async () => {
       attribution: '© OpenStreetMap',
     }).addTo(map.value);
 
-    // Fetch and add markers for each location
+
     for (const location of locations.value) {
-      const weather = await fetchWeather(location.name);
+      const coordinates = await geocodeCity(location.city);
 
-       // Log the original values
-       console.log(`Original Weather Data for ${location.name}:`, weather);
+      if (coordinates) {
+        const weather = await fetchWeather(location.city);
 
-      // Adjust temperature, wind speed, and pressure based on selected units
-      const temperature = unitsStore.tempUnit === 'C'
-        ? `${weather.temperature}°C`
-        : `${((weather.temperature * 9) / 5 + 32).toFixed(1)}°F`;
 
-      console.log(
-        `Temperature (${location.name}): Original: ${weather.temperature}°C, Converted: ${temperature}`
-      );
+        const temperature = unitsStore.tempUnit === 'C'
+          ? `${weather.temperature}°C`
+          : `${((weather.temperature * 9) / 5 + 32).toFixed(1)}°F`;
 
-      
+        const pressure = unitsStore.pressureUnit === 'hPa'
+          ? `${weather.pressure} hPa`
+          : `${(weather.pressure * 0.750062).toFixed(1)} mmHg`;
 
-      const pressure = unitsStore.pressureUnit === 'hPa'
-        ? `${weather.pressure} hPa`
-        : `${(weather.pressure * 0.750062).toFixed(1)} mmHg`;
+        const precipitation = unitsStore.precipitationUnit === 'mm'
+          ? `${weather.precipitation} mm`
+          : `${(weather.precipitation / 25.4).toFixed(2)} in`;
 
-      console.log(
-        `Pressure (${location.name}): Original: ${weather.pressure} hPa, Converted: ${pressure}`
-      );
+        // Create popup content for each location
+        const popupContent = `
+          <div class="location-weather" style="text-align: center; padding:10px;">
+            <img src="${weather.icon}" alt="${location.city}" style="width: 50px; height: 50px;"/>
+            <h5 style="font-size:15px; margin-bottom:10px;"><b>${location.city}</b></h5>
+            <span style="font-size:18px;"><strong>${weather.temperature}${unitsStore.tempUnit === 'C' ? '°C' : '°F'}</strong></span><br>
+            <p>Feels like: ${weather.feelsLike}°${unitsStore.tempUnit === 'C' ? '°C' : '°F'}</p>
+            <p>Humidity: ${weather.humidity}%</p>
+            <p>Pressure: ${pressure}</p>
+            <p>Wind Speed: ${weather.windSpeed} m/s</p>
+            <p>Visibility: ${weather.visibility} km</p>
+            <p>Cloud Coverage: ${weather.clouds}%</p>
+            <p>Precipitation: ${precipitation}</p>
+            <p>Sunset: ${weather.sunset}</p>
+          </div>
+        `;
 
-      const precipitation = unitsStore.precipitationUnit === 'mm'
-        ? `${weather.precipitation} mm`
-        : `${(weather.precipitation / 25.4).toFixed(2)} in`; // Convert mm to inches
-
-  
-      // Create popup content
-      const popupContent = `
-  <div class="location-weather" style="text-align: center; padding:10px;">
-    <img src="${weather.icon}" alt="${location.name}" style="width: 50px; height: 50px;"/>
-    <h5 style="font-size:15px; margin-bottom:10px;"><b>${location.name}</b></h5>
-    <span style="font-size:18px;"><strong>${weather.temperature}${unitsStore.tempUnit === 'C' ? '°C' : '°F'}</strong></span><br>
-    <p>Feels like: ${weather.feelsLike}°${unitsStore.tempUnit === 'C' ? '°C' : '°F'}</p>
-    <p>Humidity: ${weather.humidity}%</p>
-    <p>Pressure: ${pressure}</p>
-    <p>Wind Speed: ${weather.windSpeed} m/s</p>
-    <p>Visibility: ${weather.visibility} km</p>
-    <p>Cloud Coverage: ${weather.clouds}%</p>
-    <p>Precipitation: ${precipitation}</p>
-    <p>Sunset: ${weather.sunset}</p>
-  </div>
-`;
-
-      const marker = L.marker(location.coords).addTo(map.value).bindPopup(popupContent);
-      marker.openPopup();
+        const marker = L.marker([coordinates.lat, coordinates.lon]).addTo(map.value).bindPopup(popupContent);
+        marker.openPopup();
+      }
     }
+
 
     setTimeout(() => {
       map.value.invalidateSize();
@@ -98,9 +115,34 @@ const updateMap = async () => {
   }
 };
 
+// Fetch the locations from the Supabase database
+const fetchLocations = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('locations')
+      .select('city');
+
+    if (error) {
+      throw error;
+    }
+
+    console.log('Fetched locations from Supabase:', data);
+
+    if (!data || data.length === 0) {
+      console.error('No locations found in Supabase');
+      return;
+    }
+
+    locations.value = data;
+    updateMap();
+  } catch (error) {
+    console.error('Error fetching locations from Supabase:', error);
+  }
+};
+
 onMounted(() => {
   unitsStore.loadUnitsFromLocalStorage();
-  updateMap(); 
+  fetchLocations();
 });
 </script>
 
@@ -111,9 +153,11 @@ onMounted(() => {
   margin-left: 10px;
   margin-right: 10px;
 }
+
 .map {
   height: 100vh;
 }
+
 .location-weather {
   text-align: center;
   padding: 10px;
