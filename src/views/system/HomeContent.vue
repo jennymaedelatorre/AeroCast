@@ -7,7 +7,8 @@
             <v-card-item :title="defaultCity">
               <template v-slot:subtitle>
                 <span class="desc" style="font-size: 15.5px;">
-                  {{ currentWeather.condition }}
+                  <span v-if="!currentWeather.condition">Loading...</span>
+                  <span v-else>{{ currentWeather.condition }}</span>
                 </span>
               </template>
             </v-card-item>
@@ -15,12 +16,20 @@
             <v-card-text class="mb-5">
               <v-row align="center" no-gutters>
                 <v-col class="text-h1 temp-font" cols="6" style="font-weight: bolder;">
-                  {{ currentWeather.temperature }}&deg;{{ formattedTemperature }}
-                  <span v-if="unitsStore.tempUnit === 'C'">C</span>
-                  <span v-if="unitsStore.tempUnit === 'F'">F</span>
+                  <span>
+                    <p style="color: lightgray; font-size: 24px;" v-if="!currentWeather.temperature">Fetching Weather
+                      Temperature...</p>
+                    <span v-else>{{ currentWeather.temperature }}&deg;{{ formattedTemperature }}
+                      <span v-if="unitsStore.tempUnit === 'C'">C</span>
+                      <span v-if="unitsStore.tempUnit === 'F'">F</span>
+                    </span>
+                  </span>
                 </v-col>
                 <v-col class="weather-icon text-right" cols="6">
-                  <img :src="currentWeather.icon" alt="Weather Icon" width="180" />
+                  <div v-if="!currentWeather.icon">
+                    <span style="color: lightgray; font-size: 18px;">Loading icon...</span>
+                  </div>
+                  <img v-else :src="currentWeather.icon" alt="Weather Icon" width="180" />
                 </v-col>
               </v-row>
             </v-card-text>
@@ -29,17 +38,20 @@
 
         <!-- Today's Forecast Card -->
         <v-card class="forecast mx-auto mt-4 text-white" elevation="0">
-          <v-card-title style="font-size: 16px; margin: 10px 0 5px 30px; color:gray;">Today's Hourly
-            Forecast
+          <v-card-title style="font-size: 16px; margin: 10px 0 5px 30px; color:gray;">
+            Today's Hourly Forecast
           </v-card-title>
 
           <v-card-text>
-            <div class="overflow-x-hidden">
+            <!-- Loading Text for Hourly Forecast -->
+            <div v-if="!hourlyForecast || hourlyForecast.length === 0">
+              <span style="color: lightgray; font-size: 15px; margin-left:38%;">Loading hourly forecast...</span>
+            </div>
+
+            <div v-else class="overflow-x-hidden">
               <div class="d-flex overflow-x-auto hide-scrollbar">
                 <v-col v-for="(time, index) in hourlyForecast" :key="time.hour" cols="auto" class="hour-details">
-
-                  <v-btn class="forecast-item-btn" style="background: none; box-shadow: none;"
-                    @click="showDetails(time)" outlined>
+                  <v-btn class="forecast-item-btn" style="background: none; box-shadow: none;" outlined>
                     <div class="forecast-item text-center">
                       <div style="color:gray">{{ time.hour }}</div>
                       <img :src="time.image" alt="Weather" width="50" />
@@ -58,57 +70,14 @@
           </v-card-text>
         </v-card>
 
-        <!-- Modal (v-dialog) for Detailed Weather Info -->
-        <v-dialog v-model="dialog" max-width="500px" persistent>
-          <v-card class="rounded-lg" elevation="10"
-            style="background-color: #2a2e3b; color: white; border-radius: 20px;">
-            <v-card-title class="headline" style="font-size: 16px; font-weight: bold; padding:30px">
-              Weather Details for {{ selectedTime.hour }}
-            </v-card-title>
-
-            <v-card-text>
-              <v-row>
-
-                <v-col cols="6">
-                  <div class="weather-detail-item">
-                    <strong>Temperature:</strong> {{ selectedTime.temperature }}&deg;{{ unitsStore.tempUnit }}
-                  </div>
-                  <div class="weather-detail-item">
-                    <strong>Air Quality:</strong> {{ selectedTime.airQuality }}
-                  </div>
-                  <div class="weather-detail-item">
-                    <strong>Wind Speed:</strong> {{ selectedTime.windSpeed }} km/h
-                  </div>
-                </v-col>
-
-
-                <v-col cols="6">
-                  <div class="weather-detail-item">
-                    <strong>UV Index:</strong> {{ selectedTime.uvIndex }}
-                  </div>
-                  <div class="weather-detail-item">
-                    <strong>Humidity:</strong> {{ selectedTime.humidity }}%
-                  </div>
-                </v-col>
-              </v-row>
-            </v-card-text>
-
-
-            <v-card-actions class="justify-center mb-5" style="">
-              <v-btn @click="dialog = false" style="min-width: 150px; background-color: #3f51b5; color:white;">
-                Close
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
-
-
-
         <!-- Activity Suggestion Carousel-->
         <v-container class="suggestions">
           <v-col>
             <v-text class="suggestion-title mb-10" style="margin-left: 20px; color:gray;">Activity Suggestions</v-text>
-            <v-carousel height="200" :show-arrows="false" cycle hide-delimiters>
+            <div v-if="!activitySuggestions || activitySuggestions.length === 0">
+              <span style="color: lightgray; font-size: 15px; margin-left:38%;">Loading activity suggestions...</span>
+            </div>
+            <v-carousel v-else height="200" :show-arrows="false" cycle hide-delimiters>
               <v-carousel-item v-for="(activity, i) in activitySuggestions" :key="i">
                 <v-sheet color="transparent" height="100%">
                   <div class="d-flex fill-height justify-center align-center flex-column text-center">
@@ -262,7 +231,13 @@
           </v-card-title>
           <v-card-text>
             <v-list-item-group>
-              <v-list-item v-for="(day, index) in fiveDayForecast" :key="index">
+      
+              <div v-if="!fiveDayForecast || fiveDayForecast.length === 0">
+                <span style="color: lightgray; font-size: 15px; margin-left: 28%;">Loading forecast data...</span>
+              </div>
+
+              <!-- Display Forecast -->
+              <v-list-item v-for="(day, index) in fiveDayForecast" :key="index" v-else>
                 <v-list-item-content>
                   <v-list-item-title>
                     <div class="d-flex justify-space-between align-center">
@@ -279,8 +254,6 @@
             </v-list-item-group>
           </v-card-text>
         </v-card>
-
-
 
         <v-card class="wax-cresent text-white" elevation="0" style="background-color: #2a2e3b; padding: 20px;">
           <v-card-title style="font-size: 16px; margin: 10px 0 15px 30px; color: gray;">

@@ -48,8 +48,7 @@
         <v-card class="switch">
           <v-row>
             <v-col>
-              <v-btn block class="switch-btn"
-                :color="unitsStore.precipitationUnit === 'mm' ? '#2a2e3b' : '#191d2c'"
+              <v-btn block class="switch-btn" :color="unitsStore.precipitationUnit === 'mm' ? '#2a2e3b' : '#191d2c'"
                 @click="unitsStore.setPrecipitationUnit('mm')">
                 Millimeters
               </v-btn>
@@ -66,19 +65,38 @@
       </v-card-text>
     </v-card>
 
-    <!-- Logout Card -->
-    <v-card class="logout-card text-white mt-5" style="background-color:#2a2e3b; border-radius: 20px; padding: 20px;"
-      @click="onLogout" :loading="formAction.formProcess" :disabled="formAction.formProcess">
-      <v-row align="center" class="d-flex">
-        <v-col cols="auto" class="d-flex align-center">
-          <v-card-title class="logout-header" style="font-size: 18px; font-weight: bolder;">Logout</v-card-title>
-        </v-col>
-        <v-spacer></v-spacer>
-        <v-col cols="auto" class="d-flex justify-end pe-3">
-          <v-icon size="24">mdi-logout</v-icon>
-        </v-col>
-      </v-row>
+    <!-- Modal for displaying logout confirmation -->
+    <v-dialog v-model="isLogoutModalVisible" max-width="400px">
+    <v-card
+      style="background-color: #2a2e3b; height: 300px; color: #fff; font-weight: bold; padding: 20px; border-radius: 20px; font-family: 'Times New Roman', Times, serif;">
+      <v-card-title class="logout-title">
+        <v-icon left color="red">mdi-logout</v-icon>
+        Log Out
+      </v-card-title>
+      <v-card-text>
+        <p>Are you sure you want to log out?</p>
+      </v-card-text>
+      <v-card-actions>
+        <v-btn color="white" text @click="closeLogoutModal">Cancel</v-btn>
+        <v-btn color="error" text @click="onLogout">Log Out</v-btn>
+      </v-card-actions>
     </v-card>
+  </v-dialog>
+
+
+    <!-- Logout Card -->
+  <v-card class="logout-card text-white mt-10" style="background-color:#2a2e3b; border-radius: 20px; padding: 20px;"
+    @click="showLogoutModal" :loading="formAction.formProcess" :disabled="formAction.formProcess">
+    <v-row align="center" class="d-flex">
+      <v-col cols="auto" class="d-flex align-center">
+        <v-card-title class="logout-header" style="font-size: 18px; font-weight: bolder;">Logout</v-card-title>
+      </v-col>
+      <v-spacer></v-spacer>
+      <v-col cols="auto" class="d-flex justify-end pe-3">
+        <v-icon size="24">mdi-logout</v-icon>
+      </v-col>
+    </v-row>
+  </v-card>
   </v-container>
 </template>
 
@@ -91,9 +109,21 @@ import { supabase, formActionDefault } from '@/utils/supabase';
 const unitsStore = useUnitsStore();
 
 
-// Logout function
 const router = useRouter();
 const formAction = ref({ ...formActionDefault });
+
+
+const isLogoutModalVisible = ref(false);
+
+
+const showLogoutModal = () => {
+  isLogoutModalVisible.value = true;
+};
+
+const closeLogoutModal = () => {
+  isLogoutModalVisible.value = false;
+};
+
 
 const onLogout = async () => {
   formAction.value.formProcess = true;
@@ -104,7 +134,8 @@ const onLogout = async () => {
     return;
   }
   formAction.value.formProcess = false;
-  router.replace('/');
+  router.replace('/'); 
+  closeLogoutModal(); 
 };
 </script>
 
