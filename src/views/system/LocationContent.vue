@@ -64,6 +64,24 @@
           </v-card>
         </v-dialog>
 
+        <!-- Modal for displaying success when city is added successfully -->
+        <v-dialog v-model="isSuccessModalVisible" max-width="400px">
+          <v-card
+            style="background-color: #2a2e3b; height: 300px; color: #fff; font-weight: bold; padding: 20px; border-radius: 20px; font-family: 'Times New Roman', Times, serif;">
+            <v-card-title class="success-title">
+              <v-icon left color="green">mdi-check-circle</v-icon>
+              Success
+            </v-card-title>
+            <v-card-text>
+              <p>The city has been successfully added!</p>
+            </v-card-text>
+            <v-card-actions>
+              <v-btn color="white" text @click="closeSuccessModal">Close</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+
+
         <!-- Modal for successful city deletion -->
         <v-dialog v-model="isDeleteModalVisible" max-width="400px">
           <v-card
@@ -80,6 +98,36 @@
             </v-card-actions>
           </v-card>
         </v-dialog>
+
+        <!-- Skeleton loader for city cards -->
+        <v-skeleton-loader v-if="isLoading" type="card" :loading="isLoading" :card-height="300" class="mb-5"
+          style="background-color: #2a2e3b">
+          <template v-slot:default>
+            <v-card class="city-card" :style="{ height: '250px' }">
+              <v-row>
+                <v-col cols="12" class="text-center">
+                  <v-skeleton-loader type="image" height="100px" width="100px" class="mt-2"></v-skeleton-loader>
+                  <v-skeleton-loader type="heading" height="30px" class="mt-2"></v-skeleton-loader>
+                  <v-skeleton-loader type="text" height="20px" class="mt-1"></v-skeleton-loader>
+                </v-col>
+              </v-row>
+            </v-card>
+          </template>
+        </v-skeleton-loader>
+        <v-skeleton-loader v-if="isLoading" type="card" :loading="isLoading" :card-height="300" class="mb-5"
+          style="background-color: #2a2e3b">
+          <template v-slot:default>
+            <v-card class="city-card" :style="{ height: '250px' }">
+              <v-row>
+                <v-col cols="12" class="text-center">
+                  <v-skeleton-loader type="image" height="100px" width="100px" class="mt-2"></v-skeleton-loader>
+                  <v-skeleton-loader type="heading" height="30px" class="mt-2"></v-skeleton-loader>
+                  <v-skeleton-loader type="text" height="20px" class="mt-1"></v-skeleton-loader>
+                </v-col>
+              </v-row>
+            </v-card>
+          </template>
+        </v-skeleton-loader>
 
         <!-- City Cards (Dynamic Generation) -->
         <v-card v-for="(city, index) in filteredItems" :key="index" class="city-card text-white mt-5" :style="{
@@ -104,14 +152,44 @@
               </p>
             </div>
             <div class="ms-8" style="flex: 1;">
-              <h2>{{ city.title }}</h2>
+              <div class="city-name-title" style="font-size: 24px; font-weight: bold; margin-bottom: 10px;">
+                <template v-if="!cityWeather[city.title]">
+                  <p style="color: lightgray; font-size: 14px; margin-top: 10px;">Loading city name...</p>
+                </template>
+                <template v-else>
+                  {{ city.title }}
+                </template>
+              </div>
               <p>{{ city.description }}</p>
             </div>
           </v-col>
 
+          <!-- Modal for setting default city -->
+          <v-dialog v-model="isSetDefaultModalVisible" max-width="400px">
+            <v-card
+              style="background-color: #2a2e3b; height: 300px; color: #fff; font-weight: bold; padding: 20px; border-radius: 20px; font-family: 'Times New Roman', Times, serif;">
+              <v-card-title>
+                <v-icon left color="green">mdi-check-circle</v-icon>
+                Success
+              </v-card-title>
+              <v-card-text>
+                <p>{{ defaultCityMessage }}</p>
+              </v-card-text>
+              <v-card-actions>
+                <v-btn color="white" text @click="closeSetDefaultModal">Close</v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
+
+
           <v-col class="text-right" style="margin-right: 30px;">
             <h2 class="temperature mb-3" style="font-size: 50px;">
-              {{ cityWeather[city.title]?.temperature || 'loading...' }}°C
+              <template v-if="!cityWeather[city.title]?.temperature">
+                <p style="color: lightgray; font-size: 14px; margin-top: 10px;">loading temperature...</p>
+              </template>
+              <template v-else>
+                {{ cityWeather[city.title]?.temperature }}°{{ unitsStore.tempUnit === 'C' ? 'C' : 'F' }}
+              </template>
             </h2>
             <v-btn color="primary" rounded @click="setDefaultCity(city.title)" class="see-more">
               <h4 style="font-size: 11px;">Set default</h4>
@@ -121,17 +199,39 @@
             </v-btn>
           </v-col>
         </v-card>
-
-
       </v-col>
 
       <!-- Right Section: Selected City Details -->
       <v-col cols="12" lg="4">
-        <v-card class="weather mx-auto mt-4" elevation="0" style="border: none;" v-if="selectedCity">
+
+        <v-skeleton-loader v-if="isLoading" type="card" :loading="isLoading" :card-height="350" class="mb-5"
+          style="background-color: #2a2e3b;">
+          <template v-slot:default>
+            <v-card class="weather mx-auto mt-4" elevation="0" style="border: none;">
+              <v-card-item>
+                <v-skeleton-loader type="heading" height="80px" class="mt-2"></v-skeleton-loader>
+                <v-skeleton-loader type="text" height="20px" class="mt-2"></v-skeleton-loader>
+              </v-card-item>
+              <v-card-text>
+                <v-skeleton-loader type="image" height="150px" width="150px" class="mt-3"></v-skeleton-loader>
+                <v-skeleton-loader type="heading" height="80px" class="mt-3"></v-skeleton-loader>
+              </v-card-text>
+            </v-card>
+          </template>
+        </v-skeleton-loader>
+
+        <!-- Weather Card for Selected City -->
+        <v-card v-show="!isLoading" class="weather mx-auto mt-4" elevation="0" style="border: none;"
+          v-if="selectedCity">
           <v-card-item :title="selectedCity">
             <template v-slot:subtitle>
               <span class="desc" style="font-size: 13.5px;">
-                {{ cityWeather[selectedCity]?.description || 'loading...' }}
+                <template v-if="!cityWeather[selectedCity]?.description">
+                  Loading description...
+                </template>
+                <template v-else>
+                  {{ cityWeather[selectedCity]?.description }}
+                </template>
               </span>
             </template>
           </v-card-item>
@@ -139,10 +239,21 @@
           <v-card-text class="mb-5">
             <v-row align="center" no-gutters>
               <v-col class="text-h2" cols="6" style="font-weight: bolder;">
-                {{ cityWeather[selectedCity]?.temperature || 'loading...' }}&deg;C
+                <p v-if="!cityWeather[selectedCity]?.temperature"
+                  style="color: lightgray; font-size: 14px; margin-top: 10px;">
+                  Loading temperature...
+                </p>
+                <p v-else>
+                  {{ cityWeather[selectedCity]?.temperature }}&deg;{{ unitsStore.tempUnit === 'C' ? 'C' : 'F' }}
+                </p>
               </v-col>
               <v-col class="weather-icon text-right" cols="6">
-                <img :src="cityWeather[selectedCity]?.icon || 'default.png'" alt="" width="150" />
+                <template v-if="!cityWeather[selectedCity]?.icon">
+                  <p style="color: lightgray; font-size: 14px;">Loading weather icon...</p>
+                </template>
+                <template v-else>
+                  <img :src="cityWeather[selectedCity]?.icon || 'default.png'" alt="Weather icon" width="150" />
+                </template>
               </v-col>
             </v-row>
           </v-card-text>
@@ -160,10 +271,25 @@
                 <v-col v-for="(time, index) in hourlyForecast" :key="time.hour" cols="auto">
                   <div class="d-flex align-center">
                     <div class="forecast-item text-center">
+                      <template v-if="!time.image || !time.temperature">
+                        <p style="color: lightgray; font-size: 14px;">Loading forecast data...</p>
+                      </template>
                       <div style="color: gray;">{{ time.hour }}</div>
-                      <img :src="time.image" alt="Weather" width="50" />
-                      <div style="font-size: 18px; font-weight: bolder;">{{ time.temperature }}&deg;C</div>
+                      <template v-if="!time.image">
+                      </template>
+                      <template v-else>
+                        <img :src="time.image" alt="Weather" width="50" />
+                      </template>
+                      <template v-if="!time.temperature">
+                        <p style="color: lightgray; font-size: 14px;">Loading temperature...</p>
+                      </template>
+                      <template v-else>
+                        <div style="font-size: 18px; font-weight: bolder;">
+                          {{ time.temperature }}&deg;{{ unitsStore.tempUnit === 'C' ? 'C' : 'F' }}
+                        </div>
+                      </template>
                     </div>
+
                     <div v-if="index < hourlyForecast.length - 1" class="divider"></div>
                   </div>
                 </v-col>
@@ -188,7 +314,8 @@
                     <div class="d-flex justify-space-between align-center">
                       <span style="color: gray">{{ day.date }}</span>
                       <img :src="day.icon" alt="Weather Icon" style="width: 40px; height: 40px; margin-right: 8px;" />
-                      <span class="ml" style="font-size: 20px;"><strong>{{ day.temperature }}°C</strong></span>
+                      <span class="ml" style="font-size: 20px;"><strong>{{ day.temperature }}°{{ unitsStore.tempUnit ===
+                        'C' ? 'C' : 'F' }}</strong></span>
                     </div>
                   </v-list-item-title>
                   <v-list-item-subtitle style="color: lightgray;">
@@ -200,10 +327,12 @@
             </v-list-item-group>
           </v-card-text>
         </v-card>
+
       </v-col>
     </v-row>
   </v-container>
 </template>
+
 
 
 <script>
@@ -214,6 +343,9 @@ import { useUnitsStore } from '@/stores/unit';
 export default {
   data() {
     return {
+      isSetDefaultModalVisible: false,
+      defaultCityMessage: '',
+      isSuccessModalVisible: false,
       successMessage: '',
       errorMessage: '',
       successAlert: false,
@@ -223,7 +355,7 @@ export default {
       cityWeather: {},
       hourlyForecast: [],
       threeDayForecast: [],
-      isLoading: true,
+      isLoading: false,
       error: null,
       dialog: false,
       newCityName: '',
@@ -246,6 +378,8 @@ export default {
 
 
   async mounted() {
+    this.isLoading = true; // Start loading
+
     this.unitsStore = useUnitsStore();
     this.unitsStore.loadUnitsFromLocalStorage();
 
@@ -260,11 +394,34 @@ export default {
       this.fetchWeather(cityName);
       this.fetchForecast(cityName);
     });
-
-    this.isLoading = false;
+    // Simulate loading delay
+    setTimeout(() => {
+      this.isLoading = false;
+    }, 2000);
   },
 
   methods: {
+
+    showSuccessModal(message) {
+      this.successMessage = message;
+      this.isSuccessModalVisible = true;
+    },
+
+
+    closeSuccessModal() {
+      this.isSuccessModalVisible = false;
+    },
+
+    showSetDefaultModal(cityName) {
+      this.defaultCityMessage = `${cityName} has been set as your default city!`;
+      this.isSetDefaultModalVisible = true;
+    },
+
+
+    closeSetDefaultModal() {
+      this.isSetDefaultModalVisible = false;
+    },
+
     closeModal() {
       this.isModalVisible = false;
       this.errorAlert = false;
@@ -277,7 +434,7 @@ export default {
 
     async fetchCitiesFromSupabase() {
       try {
-        this.isLoading = true;
+
 
         const { data: { user }, error: userError } = await supabase.auth.getUser();
         if (userError || !user) throw new Error('User not authenticated');
@@ -352,12 +509,8 @@ export default {
         this.dialog = false;
         this.cityNotFound = false;
 
-        this.successMessage = 'City added successfully!';
-        this.successAlert = true;
+        this.showSuccessModal('City added successfully!');
 
-        setTimeout(() => {
-          this.successAlert = false;
-        }, 3000);
       } catch (err) {
         console.error(err.message);
         if (err.message === 'City not found') {
@@ -407,7 +560,6 @@ export default {
         }
 
         this.isDeleteModalVisible = true;
-        this.successAlert = true;
         this.successMessage = `${cityName} has been successfully deleted!`;
 
         setTimeout(() => {
@@ -435,7 +587,7 @@ export default {
 
         const locationId = locationData.id;
 
-        // Step 2: Remove any existing default for the user
+
         const { error: resetError } = await supabase
           .from('user_locations')
           .update({ is_default: false })
@@ -452,8 +604,7 @@ export default {
 
         if (setDefaultError) throw new Error('Failed to set default city');
 
-
-        this.successAlert = true;
+        this.showSetDefaultModal(cityName);
         this.successMessage = `${cityName} has been set as your default city!`;
         setTimeout(() => {
           this.successAlert = false;
@@ -465,6 +616,7 @@ export default {
         console.error(err.message);
         this.errorAlert = true;
         this.errorMessage = err.message;
+
         setTimeout(() => {
           this.errorAlert = false;
         }, 3000);

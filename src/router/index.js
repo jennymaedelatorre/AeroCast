@@ -49,14 +49,14 @@ const router = createRouter({
           component: LocationContent,
         },
         {
-          path: 'about',
-          name: 'about',
-          component: AboutContent,
-        },
-        {
           path: 'settings',
           name: 'settings',
           component: SettingContent,
+        },
+        {
+          path: 'about',
+          name: 'about',
+          component: AboutContent,
         },
       ],
     },

@@ -34,17 +34,19 @@
           </v-list-item>
         </router-link>
 
-        <router-link to="/dashboard/about" class="spaced-list-item" style="text-decoration: none; color: inherit;" active-class="active-link">
-          <v-list-item prepend-icon="mdi-calendar-month">
-            <v-list-item-title>About</v-list-item-title>
-          </v-list-item>
-        </router-link>
-
         <router-link to="/dashboard/settings" class="spaced-list-item" style="text-decoration: none; color: inherit;" active-class="active-link">
           <v-list-item prepend-icon="mdi-cog">
             <v-list-item-title>Settings</v-list-item-title>
           </v-list-item>
         </router-link>
+
+        <router-link to="/dashboard/about" class="spaced-list-item" style="text-decoration: none; color: inherit;" active-class="active-link">
+          <v-list-item prepend-icon="mdi-information">
+            <v-list-item-title>About</v-list-item-title>
+          </v-list-item>
+        </router-link>
+
+
       </v-list>
     </v-navigation-drawer>
   </div>
