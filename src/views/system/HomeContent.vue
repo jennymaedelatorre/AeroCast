@@ -315,7 +315,7 @@
                 
                 <!-- Quote -->
             <blockquote style="margin: 0; font-style: italic; font-size: 22px; line-height: 1.5;">
-              <p><strong style="font-size: 24px;">"{{ currentQuote }}"</strong></p>
+              <p><strong style="font-size: 20px;">"{{ currentQuote }}"</strong></p>
             </blockquote>
                 
                 <!-- Author's name -->
