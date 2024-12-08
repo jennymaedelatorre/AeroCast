@@ -308,22 +308,22 @@
         </v-card>
 
         <!-- Qoute Carddddd -->
-        <v-card class="quote-card text-white mt-8 mb-16" height="350px"
-          style="display: flex; justify-content: center; align-items: center; background-color:#2a2e3b; border-radius: 30px;">
-          <div class="weather-quote"
-            style="text-align: center; padding: 30px; display: flex; flex-direction: column; align-items: center;">
-            <img :src="currentQuoteImage" alt="Author"
-              style="border-radius: 50%; width: 100px; height: 100px; margin-bottom: 0px; object-fit: cover;" />
-            <blockquote>
-              <p><strong><span style="font-size: 23px;">" </span>{{ currentQuote }}<span style="font-size: 25px;">
-                    "</span></strong></p>
-              <footer class="text-right mt-5">— {{ currentAuthor }}</footer>
+        <v-card class="quote-card text-white mt-8 mb-16" height="350px" style="display: flex; justify-content: center; align-items: center; background-color:#2a2e3b; border-radius: 30px;">
+          <div class="weather-quote" style="text-align: center; padding: 30px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                <!-- Author image (circle style) -->
+            <img :src="currentQuoteImage" alt="Author" style="border-radius: 50%; width: 100px; height: 100px; margin-bottom: 10px; object-fit: cover;" />
+                
+                <!-- Quote -->
+            <blockquote style="margin: 0; font-style: italic; font-size: 22px; line-height: 1.5;">
+              <p><strong style="font-size: 24px;">"{{ currentQuote }}"</strong></p>
             </blockquote>
+                
+                <!-- Author's name -->
+            <footer class="text-right mt-5" style="font-size: 18px; color: #ddd;">
+              — {{ currentAuthor }}
+            </footer>
           </div>
         </v-card>
-
-
-
       </v-col>
     </v-row>
   </v-container>
@@ -566,7 +566,6 @@ const quotes = ref([
   { text: "To appreciate the beauty of a snowflake, it is necessary to stand out in the cold.", author: "Aristotle", image: "/imgs/aristotle.jpg" }
 ]);
 
-
 const updateQuote = () => {
   currentQuote.value = quotes.value[index].text;
   currentAuthor.value = quotes.value[index].author;
@@ -579,7 +578,7 @@ onMounted(async () => {
   console.log(`Fetched default city: ${defaultCity.value}`);
   loadWeatherData();
   updateQuote();
-  quoteTimer = setInterval(updateQuote, 5000);
+  quoteTimer = setInterval(updateQuote, 10000);
 });
 
 
