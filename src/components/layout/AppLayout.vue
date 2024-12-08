@@ -36,14 +36,14 @@
             <span>Cities</span>
           </v-btn>
 
-          <v-btn to="/dashboard/calendar" class="icon-btn">
-            <v-icon>mdi-calendar-month</v-icon>
-            <span>Calendar</span>
-          </v-btn>
-
           <v-btn to="/dashboard/settings" class="icon-btn">
             <v-icon>mdi-cog</v-icon>
             <span>Settings</span>
+          </v-btn>
+
+          <v-btn to="/dashboard/about" class="icon-btn">
+            <v-icon>mdi-information</v-icon>
+            <span>About</span>
           </v-btn>
         </v-bottom-navigation>
       </div>
