@@ -101,7 +101,7 @@
 
         <!-- Skeleton loader for city cards -->
         <v-skeleton-loader v-if="isLoading" type="card" :loading="isLoading" :card-height="300" class="mb-5"
-          style="background-color: #2a2e3b">
+          style="background-color: #2a2e3b; border-radius: 20px;">
           <template v-slot:default>
             <v-card class="city-card" :style="{ height: '250px' }">
               <v-row>
@@ -115,7 +115,7 @@
           </template>
         </v-skeleton-loader>
         <v-skeleton-loader v-if="isLoading" type="card" :loading="isLoading" :card-height="300" class="mb-5"
-          style="background-color: #2a2e3b">
+          style="background-color: #2a2e3b; border-radius: 20px;">
           <template v-slot:default>
             <v-card class="city-card" :style="{ height: '250px' }">
               <v-row>
@@ -205,7 +205,7 @@
       <v-col cols="12" lg="4">
 
         <v-skeleton-loader v-if="isLoading" type="card" :loading="isLoading" :card-height="350" class="mb-5"
-          style="background-color: #2a2e3b;">
+          style="background-color: #2a2e3b; border-radius: 20px;">
           <template v-slot:default>
             <v-card class="weather mx-auto mt-4" elevation="0" style="border: none;">
               <v-card-item>

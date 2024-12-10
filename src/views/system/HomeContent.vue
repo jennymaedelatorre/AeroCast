@@ -349,12 +349,7 @@ const activitySuggestions = ref([]);
 
 const unitsStore = useUnitsStore();
 
-onMounted(() => {
-  unitsStore.loadUnitsFromLocalStorage();
-  loadWeatherData();
-  updateQuote();
-  quoteTimer = setInterval(updateQuote, 5000);
-});
+
 
 const temperatureDisplay = computed(() => {
   return unitsStore.tempUnit === 'C'
@@ -567,24 +562,30 @@ const quotes = ref([
 ]);
 
 const updateQuote = () => {
-  currentQuote.value = quotes.value[index].text;
-  currentAuthor.value = quotes.value[index].author;
-  currentQuoteImage.value = quotes.value[index].image;
+  const quote = quotes.value[index];
+  currentQuote.value = quote.text;
+  currentAuthor.value = quote.author;
+  currentQuoteImage.value = quote.image;
+
   index = (index + 1) % quotes.value.length;
 };
 
 onMounted(async () => {
-  defaultCity.value = await fetchDefaultCityFromSupabase(); // Fetch the default city
+  defaultCity.value = await fetchDefaultCityFromSupabase();
   console.log(`Fetched default city: ${defaultCity.value}`);
+  
+  unitsStore.loadUnitsFromLocalStorage();
   loadWeatherData();
-  updateQuote();
-  quoteTimer = setInterval(updateQuote, 10000);
-});
 
+  
+  updateQuote();
+  quoteTimer = setInterval(updateQuote, 5000); 
+});
 
 onBeforeUnmount(() => {
-  clearInterval(quoteTimer);
+  clearInterval(quoteTimer); 
 });
+
 </script>
 
 
