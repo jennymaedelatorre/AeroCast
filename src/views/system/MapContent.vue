@@ -13,6 +13,15 @@ import L from 'leaflet';
 import supabase from '@/utils/supabase';
 import axios from 'axios';
 
+
+delete L.Icon.Default.prototype._getIconUrl;
+
+L.Icon.Default.mergeOptions({
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+});
+
 const locations = ref([]);
 const map = ref(null);
 const unitsStore = useUnitsStore();
@@ -30,11 +39,11 @@ const geocodeCity = async (city) => {
         q: city,
         format: 'json',
         addressdetails: 1,
-        limit: 1
+        limit: 1,
       },
       headers: {
-        'User-Agent': 'YourAppName/1.0 (contact@yourdomain.com)'
-      }
+        'User-Agent': 'YourAppName/1.0 (contact@yourdomain.com)',
+      },
     });
 
     if (response.data.length > 0) {
@@ -52,24 +61,24 @@ const geocodeCity = async (city) => {
 
 const updateMap = async () => {
   try {
+    // Initialize the map
     map.value = L.map('map', {
       center: [12.8797, 121.7740],
       zoom: 6,
       zoomControl: true,
     });
 
+    // Add OpenStreetMap tile layer
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '© OpenStreetMap',
     }).addTo(map.value);
-
 
     for (const location of locations.value) {
       const coordinates = await geocodeCity(location.city);
 
       if (coordinates) {
         const weather = await fetchWeather(location.city);
-
 
         const temperature = unitsStore.tempUnit === 'C'
           ? `${weather.temperature}°C`
@@ -83,7 +92,7 @@ const updateMap = async () => {
           ? `${weather.precipitation} mm`
           : `${(weather.precipitation / 25.4).toFixed(2)} in`;
 
-        // Create popup content for each location
+        // Create popup content
         const popupContent = `
           <div class="location-weather" style="text-align: center; padding:10px;">
             <img src="${weather.icon}" alt="${location.city}" style="width: 50px; height: 50px;"/>
@@ -100,22 +109,24 @@ const updateMap = async () => {
           </div>
         `;
 
+        // Add marker with popup
         const marker = L.marker([coordinates.lat, coordinates.lon]).addTo(map.value).bindPopup(popupContent);
         marker.openPopup();
       }
     }
 
-
+    // Adjust map size
     setTimeout(() => {
-      map.value.invalidateSize();
-    }, 0);
+      if (map.value) {
+        map.value.invalidateSize();
+      }
+    }, 100);
 
   } catch (error) {
     console.error('Error loading map or weather data:', error);
   }
 };
 
-// Fetch the locations from the Supabase database
 const fetchLocations = async () => {
   try {
     const { data, error } = await supabase
@@ -125,8 +136,6 @@ const fetchLocations = async () => {
     if (error) {
       throw error;
     }
-
-    console.log('Fetched locations from Supabase:', data);
 
     if (!data || data.length === 0) {
       console.error('No locations found in Supabase');
