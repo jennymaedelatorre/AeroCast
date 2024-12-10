@@ -58,7 +58,7 @@
       // console.log(data) Add Success Message 
       formAction.value.formSuccessMessage = 'Successfully Registered! You can now log in.'
       // Add here more actions if you want
-      router.replace('/login')
+      router.replace('/dashboard')
     }
 
     // Reset Form
