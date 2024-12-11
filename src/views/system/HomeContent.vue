@@ -335,7 +335,7 @@ import { ref, onMounted, onBeforeUnmount, computed } from 'vue';
 import { fetchWeather, fetchForecast } from '@/utils/useWeather';
 import { useUnitsStore } from '@/stores/unit';
 
-
+const currentUserId = ref(null)
 const currentQuote = ref('');
 const currentAuthor = ref('');
 const currentQuoteImage = ref('');
@@ -384,39 +384,90 @@ const fiveDayForecast = ref([]);
 const defaultCity = ref('');
 
 
-// default city
+// Fetch authenticated user ID
+const fetchAuthenticatedUser = async () => {
+  const { data: { user }, error } = await supabase.auth.getUser();
+
+  if (error) {
+    console.error('Error fetching user:', error);
+    return null;
+  }
+
+  return user.id;
+};
+
+// Fetch default city for the logged-in user
 const fetchDefaultCityFromSupabase = async () => {
   try {
-
     const { data, error } = await supabase
       .from('user_locations')
       .select('location_id')
+      .eq('user_id', currentUserId.value)
       .eq('is_default', true)
       .single();
 
-    if (error) {
-      throw error;
+    if (error || !data) {
+      console.warn('No default city found. Using fallback.');
+      return 'Butuan City'; 
     }
 
-    // Fetch city name from locations table
-    if (data?.location_id) {
-      const { data: locationData, error: locationError } = await supabase
-        .from('locations')
-        .select('city')
-        .eq('id', data.location_id)
-        .single();
+    // Fetch city name from the locations table
+    const { data: locationData, error: locationError } = await supabase
+      .from('locations')
+      .select('city')
+      .eq('id', data.location_id)
+      .single();
 
-      if (locationError) {
-        throw locationError;
-      }
-
-      return locationData?.city || 'Butuan City';
+    if (locationError) {
+      console.warn('Error fetching city name:', locationError);
+      return 'Butuan City';
     }
 
-    return 'Butuan City';
+    return locationData?.city || 'Butuan City';
   } catch (err) {
     console.error('Error fetching default city from Supabase:', err);
-    return 'Butuan city'; // Fallback city
+    return 'Butuan City'; 
+  }
+};
+
+// Save default city for the logged-in user
+const saveDefaultCityToSupabase = async (city) => {
+  try {
+    // Fetch the location ID for the given city
+    const { data: locationData, error: locationError } = await supabase
+      .from('locations')
+      .select('id')
+      .eq('city', city)
+      .single();
+
+    if (locationError) {
+      console.error('Error finding location:', locationError);
+      return;
+    }
+
+    const locationId = locationData?.id;
+
+    if (!locationId) {
+      console.warn('Location ID not found for city:', city);
+      return;
+    }
+
+    // Save user-specific default city 
+    const { error: saveError } = await supabase
+      .from('user_locations')
+      .upsert({
+        user_id: currentUserId.value,
+        location_id: locationId,
+        is_default: true,
+      });
+
+    if (saveError) {
+      console.error('Error saving default city:', saveError);
+    } else {
+      console.log('Default city saved:', city);
+    }
+  } catch (err) {
+    console.error('Error saving default city:', err);
   }
 };
 
@@ -571,6 +622,13 @@ const updateQuote = () => {
 };
 
 onMounted(async () => {
+  currentUserId.value = await fetchAuthenticatedUser();
+  if (!currentUserId.value) {
+    console.error('No user logged in. Default settings applied.');
+    defaultCity.value = 'Butuan City';
+    return;
+  }
+
   defaultCity.value = await fetchDefaultCityFromSupabase();
   console.log(`Fetched default city: ${defaultCity.value}`);
   
