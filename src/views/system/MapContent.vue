@@ -13,7 +13,6 @@ import L from 'leaflet';
 import supabase from '@/utils/supabase';
 import axios from 'axios';
 
-
 delete L.Icon.Default.prototype._getIconUrl;
 
 L.Icon.Default.mergeOptions({
@@ -24,12 +23,13 @@ L.Icon.Default.mergeOptions({
 
 const locations = ref([]);
 const map = ref(null);
+const currentUserId = ref(null);
 const unitsStore = useUnitsStore();
 
 // Function to fetch the coordinates using Nominatim API
 const geocodeCity = async (city) => {
   if (!city || city.trim() === '') {
-    console.error("City name is empty.");
+    console.error('City name is empty.');
     return null;
   }
 
@@ -63,17 +63,55 @@ const updateMap = async () => {
   try {
     // Initialize the map
     map.value = L.map('map', {
-      center: [12.8797, 121.7740],
+      center: [12.8797, 121.7740], 
       zoom: 6,
       zoomControl: true,
     });
 
-    // Add OpenStreetMap tile layer
+    
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '© OpenStreetMap',
     }).addTo(map.value);
 
+    
+    const butuanCoordinates = await geocodeCity('Butuan City');
+    if (butuanCoordinates) {
+      const weather = await fetchWeather('Butuan City');
+      const temperature = unitsStore.tempUnit === 'C'
+        ? `${weather.temperature}°C`
+        : `${((weather.temperature * 9) / 5 + 32).toFixed(1)}°F`;
+
+      const pressure = unitsStore.pressureUnit === 'hPa'
+        ? `${weather.pressure} hPa`
+        : `${(weather.pressure * 0.750062).toFixed(1)} mmHg`;
+
+      const precipitation = unitsStore.precipitationUnit === 'mm'
+        ? `${weather.precipitation} mm`
+        : `${(weather.precipitation / 25.4).toFixed(2)} in`;
+
+      // Create popup content for Butuan City
+      const butuanPopupContent = `
+        <div class="location-weather" style="text-align: center; padding:10px;">
+          <img src="${weather.icon}" alt="Butuan City" style="width: 50px; height: 50px;"/>
+          <h5 style="font-size:15px; margin-bottom:10px;"><b>Butuan City</b></h5>
+          <span style="font-size:18px;"><strong>${weather.temperature}${unitsStore.tempUnit === 'C' ? '°C' : '°F'}</strong></span><br>
+          <p>Feels like: ${weather.feelsLike}°${unitsStore.tempUnit === 'C' ? '°C' : '°F'}</p>
+          <p>Humidity: ${weather.humidity}%</p>
+          <p>Pressure: ${pressure}</p>
+          <p>Wind Speed: ${weather.windSpeed} m/s</p>
+          <p>Visibility: ${weather.visibility} km</p>
+          <p>Cloud Coverage: ${weather.clouds}%</p>
+          <p>Precipitation: ${precipitation}</p>
+          <p>Sunset: ${weather.sunset}</p>
+        </div>
+      `;
+      
+      const butuanMarker = L.marker([butuanCoordinates.lat, butuanCoordinates.lon]).addTo(map.value).bindPopup(butuanPopupContent);
+      butuanMarker.openPopup();
+    }
+
+    
     for (const location of locations.value) {
       const coordinates = await geocodeCity(location.city);
 
@@ -92,7 +130,7 @@ const updateMap = async () => {
           ? `${weather.precipitation} mm`
           : `${(weather.precipitation / 25.4).toFixed(2)} in`;
 
-        // Create popup content
+        // Create popup content for user-specific locations
         const popupContent = `
           <div class="location-weather" style="text-align: center; padding:10px;">
             <img src="${weather.icon}" alt="${location.city}" style="width: 50px; height: 50px;"/>
@@ -109,7 +147,7 @@ const updateMap = async () => {
           </div>
         `;
 
-        // Add marker with popup
+        // Add marker for user-specific locations
         const marker = L.marker([coordinates.lat, coordinates.lon]).addTo(map.value).bindPopup(popupContent);
         marker.openPopup();
       }
@@ -127,25 +165,75 @@ const updateMap = async () => {
   }
 };
 
-const fetchLocations = async () => {
+const fetchAuthenticatedUser = async () => {
   try {
-    const { data, error } = await supabase
-      .from('locations')
-      .select('city');
+    const { data, error } = await supabase.auth.getUser();
 
     if (error) {
       throw error;
     }
 
-    if (!data || data.length === 0) {
-      console.error('No locations found in Supabase');
+    if (!data || !data.user) {
+      console.error('No authenticated user found');
+      return null;
+    }
+
+    console.log('Authenticated user:', data.user);
+    return data.user;
+  } catch (error) {
+    console.error('Error fetching authenticated user:', error);
+    return null;
+  }
+};
+
+const fetchLocations = async () => {
+  try {
+    const user = await fetchAuthenticatedUser();
+    if (!user) {
+      console.error('User not authenticated');
       return;
     }
 
-    locations.value = data;
+    currentUserId.value = user.id; 
+
+    
+    const { data: userLocations, error: userLocationsError } = await supabase
+      .from('user_locations')
+      .select('location_id')
+      .eq('user_id', user.id);
+
+    if (userLocationsError) {
+      throw userLocationsError;
+    }
+
+    if (!userLocations || userLocations.length === 0) {
+      console.error('No locations found for this user in user_locations');
+      return;
+    }
+
+    
+    const locationIds = userLocations.map((entry) => entry.location_id);
+
+    
+    const { data: locationData, error: locationDataError } = await supabase
+      .from('locations')
+      .select('city')
+      .in('id', locationIds); 
+
+    if (locationDataError) {
+      throw locationDataError;
+    }
+
+    if (!locationData || locationData.length === 0) {
+      console.error('No cities found for these location IDs');
+      return;
+    }
+
+    
+    locations.value = locationData;
     updateMap();
   } catch (error) {
-    console.error('Error fetching locations from Supabase:', error);
+    console.error('Error fetching locations:', error);
   }
 };
 
