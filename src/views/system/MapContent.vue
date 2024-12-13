@@ -61,20 +61,19 @@ const geocodeCity = async (city) => {
 
 const updateMap = async () => {
   try {
-    // Initialize the map
+    // Initialize the map with Butuan City's coordinates
     map.value = L.map('map', {
-      center: [12.8797, 121.7740], 
+      center: [12.8797, 121.7740], // Default to Butuan City coordinates
       zoom: 6,
       zoomControl: true,
     });
 
-    
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '© OpenStreetMap',
     }).addTo(map.value);
 
-    
+    // Fetch and display Butuan City's weather by default
     const butuanCoordinates = await geocodeCity('Butuan City');
     if (butuanCoordinates) {
       const weather = await fetchWeather('Butuan City');
@@ -111,7 +110,13 @@ const updateMap = async () => {
       butuanMarker.openPopup();
     }
 
-    
+    // Add user-specific locations, if available
+    if (locations.value.length === 0) {
+      console.log('No user locations found, only showing Butuan City.');
+      return; // Only Butuan City will be displayed
+    }
+
+    // Add markers for user-specific locations
     for (const location of locations.value) {
       const coordinates = await geocodeCity(location.city);
 
@@ -196,7 +201,7 @@ const fetchLocations = async () => {
 
     currentUserId.value = user.id; 
 
-    
+    // Query to fetch user-specific locations
     const { data: userLocations, error: userLocationsError } = await supabase
       .from('user_locations')
       .select('location_id')
@@ -207,14 +212,16 @@ const fetchLocations = async () => {
     }
 
     if (!userLocations || userLocations.length === 0) {
-      console.error('No locations found for this user in user_locations');
+      console.warn('No locations found for this user in user_locations');
+      // Proceed to load the default location (Butuan City) if no user locations exist
+      locations.value = [];
+      updateMap();
       return;
     }
 
-    
+    // Fetch the locations using the location_ids from user_locations
     const locationIds = userLocations.map((entry) => entry.location_id);
 
-    
     const { data: locationData, error: locationDataError } = await supabase
       .from('locations')
       .select('city')
@@ -226,16 +233,20 @@ const fetchLocations = async () => {
 
     if (!locationData || locationData.length === 0) {
       console.error('No cities found for these location IDs');
+      locations.value = [];
+      updateMap();
       return;
     }
 
-    
     locations.value = locationData;
     updateMap();
   } catch (error) {
     console.error('Error fetching locations:', error);
+    locations.value = [];
+    updateMap();
   }
 };
+
 
 onMounted(() => {
   unitsStore.loadUnitsFromLocalStorage();
